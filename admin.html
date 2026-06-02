@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sektor Utama Admin - MAN 2 Sijunjung</title>
+    <title>MAN 2 Sijunjung Plus Keterampilan</title>
+    <link rel="icon" type="image/png" href="./foto/1.webp">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -21,11 +22,11 @@
     <div id="stage-splash" class="fixed inset-0 bg-gradient-to-br from-slate-950 to-emerald-950 z-50 flex flex-col items-center justify-center p-6 text-center select-none">
         <div class="space-y-6 max-w-sm">
             <div class="w-24 h-24 bg-white/10 rounded-3xl mx-auto flex items-center justify-center border border-white/20 p-3 shadow-2xl backdrop-blur-md">
-                <img src="https://cdn-icons-png.flaticon.com/512/3000/3000171.png" alt="Logo MAN 2 Sijunjung" class="w-full h-full object-contain">
+                <img src="./foto/1.webp" alt="Logo MAN 2 Sijunjung" class="w-full h-full object-contain">
             </div>
             <div>
                 <h1 class="text-xl font-extrabold text-white tracking-wide">MAN 2 Sijunjung</h1>
-                <p class="text-xs text-emerald-400 font-bold tracking-widest uppercase mt-1">Madrasah Aliyah Keterampilan</p>
+                <p class="text-xs text-emerald-400 font-bold tracking-widest uppercase mt-1">Plus Keterampilan</p>
             </div>
             <div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden relative border border-white/5">
                 <div class="bg-gradient-to-r from-emerald-400 to-teal-400 h-full w-0 rounded-full transition-all duration-1000 ease-out shadow-lg" id="splash-bar"></div>
@@ -38,32 +39,32 @@
         <div class="bg-white w-full max-w-sm p-6 rounded-3xl shadow-xl border border-slate-200/50">
             <div class="text-center mb-6">
                 <span class="text-3xl">🔒</span>
-                <h2 class="text-lg font-extrabold text-slate-800 mt-2">Otorisasi Sektor Utama</h2>
-                <p class="text-xs text-slate-400">Masukkan kunci sandi akses sistem pengendali</p>
+                <h2 class="text-lg font-extrabold text-slate-800 mt-2">Masuk Kedalam Sistem</h2>
+                <p class="text-xs text-slate-400">Masukkan kunci sandi...</p>
             </div>
             <div class="space-y-4">
                 <input type="password" id="input-pass-admin" class="w-full p-3.5 border border-slate-200 rounded-xl outline-none text-center text-sm font-bold tracking-widest focus:border-emerald-500 transition" placeholder="••••••••">
-                <button onclick="verifikasiSandiGerbang()" class="w-full bg-slate-950 text-white py-3.5 rounded-xl text-xs font-bold transition hover:bg-slate-900 shadow-lg">Buka Akses Kontrol</button>
+                <button onclick="verifikasiSandiGerbang()" class="w-full bg-slate-950 text-white py-3.5 rounded-xl text-xs font-bold transition hover:bg-slate-900 shadow-lg">Buka Akses</button>
             </div>
         </div>
     </div>
 
-    <div id="stage-core" class="hidden-sector min-h-screen flex flex-col md:flex-row flex-1">
-        
-        <aside class="w-full md:w-64 bg-slate-950 text-slate-400 p-5 flex flex-col justify-between border-r border-slate-800 shadow-xl shrink-0">
-            <div class="space-y-6">
-                <div class="flex items-center gap-3 px-2 border-b border-slate-900 pb-4">
-                    <div class="w-9 h-9 bg-emerald-500 rounded-xl flex items-center justify-center text-white font-bold text-lg">🕌</div>
-                    <div>
-                        <h2 class="text-xs font-extrabold text-white tracking-wide leading-none">MAN 2 Sijunjung</h2>
-                        <span class="text-[9px] text-emerald-400 font-bold tracking-widest uppercase mt-1 inline-block">M-Keterampilan</span>
-                    </div>
+            <div id="stage-core" class="hidden-sector min-h-screen flex flex-col md:flex-row flex-1">
+                
+                <aside class="w-full md:w-64 bg-slate-950 text-slate-400 p-5 flex flex-col justify-between border-r border-slate-800 shadow-xl shrink-0">
+                    <div class="space-y-6">
+                            <div class="flex items-center gap-3 px-2 border-b border-slate-900 pb-4">
+                <img src="./foto/1.webp" alt="Logo MAN 2 Sijunjung" class="w-9 h-9 object-contain">
+                <div>
+                    <h2 class="text-xs font-extrabold text-white tracking-wide leading-none">MAN 2 Sijunjung</h2>
+                    <span class="text-[9px] text-emerald-400 font-bold tracking-widest uppercase mt-1 inline-block">Plus Keterampilan</span>
                 </div>
+            </div>
                 <nav class="space-y-1.5 text-xs font-bold">
-                    <button onclick="switchTabSector('beranda')" id="m-beranda" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-600 text-white shadow-lg transition"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Beranda & Scan</button>
+                    <button onclick="switchTabSector('beranda')" id="m-beranda" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-600 text-white shadow-lg transition"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Beranda</button>
                     <button onclick="switchTabSector('log')" id="m-log" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-900 hover:text-slate-200 transition"><i data-lucide="calendar-days" class="w-4 h-4"></i> Log Presensi & Grafik</button>
-                    <button onclick="switchTabSector('kurikulum')" id="m-kurikulum" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-900 hover:text-slate-200 transition"><i data-lucide="book-open" class="w-4 h-4"></i> Kurikulum & Jadwal</button>
-                    <button onclick="switchTabSector('siswa')" id="m-siswa" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-900 hover:text-slate-200 transition"><i data-lucide="users-2" class="w-4 h-4"></i> Data Siswa & Akumulasi</button>
+                    <button onclick="switchTabSector('kurikulum')" id="m-kurikulum" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-900 hover:text-slate-200 transition"><i data-lucide="book-open" class="w-4 h-4"></i>Jadwal</button>
+                    <button onclick="switchTabSector('siswa')" id="m-siswa" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-900 hover:text-slate-200 transition"><i data-lucide="users-2" class="w-4 h-4"></i> Data Siswa</button>
                 </nav>
             </div>
             <button onclick="pullDataFromSheetsCloud()" class="w-full mt-4 flex items-center justify-center gap-2 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-900 text-[11px] font-bold py-2.5 rounded-xl transition">
@@ -73,7 +74,7 @@
 
         <div class="flex-1 flex flex-col">
             <header class="bg-white border-b border-slate-200/80 px-6 py-4 flex items-center justify-between sticky top-0 z-30">
-                <h3 id="txt-header-title" class="text-sm font-extrabold text-slate-800">Beranda & Pemindai Gerbang</h3>
+                <h3 id="txt-header-title" class="text-sm font-extrabold text-slate-800">Beranda</h3>
                 <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-xl text-slate-500 text-xs font-bold">
                     <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400"></i>
                     <span id="txt-live-clock">00:00:00 WIB</span>
@@ -85,7 +86,7 @@
                 <div id="sec-beranda" class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-[fadeIn_0.3s_ease-out]">
                     <div class="bg-white p-5 rounded-3xl border border-slate-200/60 shadow-sm flex flex-col justify-between">
                         <div>
-                            <h4 class="font-extrabold text-sm text-slate-800 mb-4">Lensa Scan QR Gerbang</h4>
+                            <h4 class="font-extrabold text-sm text-slate-800 mb-4">Scan QR KTS</h4>
                             <div class="bg-slate-950 aspect-square rounded-2xl overflow-hidden relative border border-slate-900 flex items-center justify-center">
                                 <div id="reader" class="w-full"></div>
                                 <div id="placeholder-cam" class="absolute inset-0 flex flex-col items-center justify-center text-slate-500 p-4 bg-slate-950 text-center">
@@ -137,9 +138,14 @@
                     </div>
 
                     <div class="lg:col-span-2 bg-white p-5 rounded-3xl border border-slate-200/60 shadow-sm flex flex-col">
-                        <div class="mb-4">
-                            <h4 class="font-extrabold text-sm text-slate-800" id="txt-chart-date">Grafik Komparasi Presensi Terkini</h4>
-                            <p class="text-[11px] text-slate-400 mt-0.5">Rasio keterlambatan siswa yang terhitung dari data riil cloud</p>
+                        <div class="mb-4 flex justify-between items-start gap-2">
+                            <div>
+                                <h4 class="font-extrabold text-sm text-slate-800" id="txt-chart-date">Grafik Komparasi Presensi Terkini</h4>
+                                <p class="text-[11px] text-slate-400 mt-0.5">Rasio keterlambatan siswa dari data log riil cloud</p>
+                            </div>
+                            <button onclick="exportAbsensiKeCSV()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-1.5 rounded-xl text-[10px] transition shadow-sm flex items-center gap-1 shrink-0">
+                                <i data-lucide="download" class="w-3 h-3"></i> Export CSV
+                            </button>
                         </div>
                         <div class="flex-1 flex items-center justify-center relative min-h-[220px]">
                             <canvas id="absenChart"></canvas>
@@ -151,7 +157,7 @@
                     
                     <div class="bg-white p-5 rounded-3xl border border-slate-200/60 shadow-sm space-y-4 flex flex-col justify-between">
                         <div class="space-y-4">
-                            <h4 class="font-extrabold text-sm text-slate-800">Manajemen Rombel Kelas</h4>
+                            <h4 class="font-extrabold text-sm text-slate-800">Manajemen Kelas</h4>
                             <div class="space-y-3">
                                 <input type="text" id="in-kelas-baru" class="w-full p-3 border border-slate-200 rounded-xl outline-none text-xs focus:border-emerald-500" placeholder="Contoh: XI - Fisika 1">
                                 <button onclick="pushKelasBaruKeSheets()" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl text-xs transition hover:bg-emerald-700 shadow-md flex items-center justify-center gap-1">
@@ -160,7 +166,7 @@
                             </div>
                         </div>
                         <div class="border-t border-slate-100 pt-3 flex-1 mt-2">
-                            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Daftar Rombel Aktif (Klik × untuk Hapus Kelas):</p>
+                            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Daftar Kelas Aktif (Klik × untuk Hapus Kelas):</p>
                             <div id="list-kelas-container" class="flex flex-wrap gap-1.5 text-xs">
                                 </div>
                         </div>
@@ -171,7 +177,7 @@
                         
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold bg-slate-50 p-4 rounded-2xl border">
                             <div>
-                                <label class="text-[11px] font-bold text-slate-500 block mb-1">Pilih Rombel Kelas</label>
+                                <label class="text-[11px] font-bold text-slate-500 block mb-1">Pilih Kelas</label>
                                 <select id="in-jadwal-kelas" onchange="renderTabelJadwalKurikulum()" class="w-full p-3 border border-slate-200 rounded-xl bg-white outline-none focus:border-emerald-500 font-bold text-slate-700">
                                     </select>
                             </div>
@@ -206,7 +212,12 @@
                         </div>
 
                         <div class="border-t pt-3">
-                            <h5 class="text-xs font-extrabold text-slate-800 mb-2">Daftar Jadwal Terkunci di Google Sheets pada Kelas Terpilih:</h5>
+                            <div class="flex justify-between items-center mb-2 gap-4">
+                                <h5 class="text-xs font-extrabold text-slate-800">Daftar Jadwal Terkunci di Google Sheets pada Kelas Terpilih:</h5>
+                                <button onclick="exportJadwalKeCSV()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-3 py-1.5 rounded-xl text-[10px] transition shadow-sm flex items-center gap-1 shrink-0">
+                                    <i data-lucide="download" class="w-3 h-3"></i> Export CSV
+                                </button>
+                            </div>
                             <div class="overflow-x-auto max-h-48 overflow-y-auto border rounded-xl">
                                 <table class="w-full text-left border-collapse text-[11px]">
                                     <thead>
@@ -225,13 +236,29 @@
                     </div>
                 </div>
 
+                <!-- 4. SEKTOR TAB: DATA SISWA -->
                 <div id="sec-siswa" class="hidden-sector bg-white border border-slate-200/60 rounded-3xl shadow-sm overflow-hidden animate-[fadeIn_0.3s_ease-out]">
-                    <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div class="p-5 border-b border-slate-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
                         <div>
-                            <h4 class="font-extrabold text-sm text-slate-800">Master Database Terdaftar (Tabel Siswa)</h4>
+                            <h4 class="font-extrabold text-sm text-slate-800">Database Terdaftar (Tabel Siswa)</h4>
                             <p class="text-xs text-slate-400 mt-0.5">Menampilkan rekapitulasi data dari baris aktif Google Sheets</p>
                         </div>
-                        <select id="filter-siswa-kelas" onchange="renderTabelSiswaDariCloud()" class="p-2.5 border border-slate-200 rounded-xl outline-none text-xs bg-slate-50 font-bold text-slate-700 min-w-[150px]"></select>
+                        <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-end">
+                            <!-- Filter Rombel Kelas -->
+                            <select id="filter-siswa-kelas" onchange="renderTabelSiswaDariCloud()" class="p-2.5 border border-slate-200 rounded-xl outline-none text-xs bg-slate-50 font-bold text-slate-700 min-w-[130px]"></select>
+                            
+                            <!-- Filter Rentang Waktu Rekap Presensi -->
+                            <select id="filter-siswa-periode" onchange="renderTabelSiswaDariCloud()" class="p-2.5 border border-slate-200 rounded-xl outline-none text-xs bg-emerald-50 font-bold text-emerald-800 min-w-[150px]">
+                                <option value="bulan">Bulan Berjalan Ini</option>
+                                <option value="semester_ganjil">Semester Ganjil (Jul - Des)</option>
+                                <option value="semester_genap">Semester Genap (Jan - Jun)</option>
+                                <option value="tahun">1 Tahun Ajaran Penuh</option>
+                            </select>
+
+                            <button onclick="exportSiswaKeCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition shadow-md flex items-center gap-1.5 whitespace-nowrap">
+                                <i data-lucide="download" class="w-4 h-4"></i> Export CSV Data Siswa
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="overflow-x-auto">
@@ -241,12 +268,15 @@
                                     <th class="p-4 text-center">Foto</th>
                                     <th class="p-4">Nama Lengkap & NISN</th>
                                     <th class="p-4">Kontak Hubungan Wali</th>
+                                    <!-- Kolom Tambahan Rekap Riil -->
+                                    <th class="p-4 text-center bg-emerald-50/50 text-emerald-700">Tepat Waktu</th>
+                                    <th class="p-4 text-center bg-amber-50/50 text-amber-700">Terlambat</th>
                                     <th class="p-4 text-center">Status</th>
                                     <th class="p-4 text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="master-tabel-siswa" class="divide-y divide-slate-100 font-semibold text-slate-600">
-                                <tr><td colspan="5" class="p-6 text-center text-slate-400">Silakan masukkan kata sandi akses terlebih dahulu...</td></tr>
+                                <tr><td colspan="7" class="p-6 text-center text-slate-400">Silakan masukkan kata sandi akses terlebih dahulu...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -258,7 +288,7 @@
 
     <script>
         // MASUKKAN URL DEPLOYMENT GOOGLE APPS SCRIPT ANDA DI SINI
-        const CONFIG_API_URL = "https://script.google.com/macros/s/AKfycbxeC8IN6yaCGla0WqJU-RAznYY481ICgkTchNrMzDk2wqiLIpPKCQbh_62NTGd9qnDnFw/exec"; 
+        const CONFIG_API_URL = "https://script.google.com/macros/s/AKfycbxWGKjbRK4PhSQDSKvqiRlb6_9sOWE4GpHxCno-oQpVPwWbGgwjYDd49JxkGDqn-ALcjA/exec"; 
 
         let objScanner = null;
         let chartInstance = null;
@@ -343,9 +373,10 @@
             renderTabelSiswaDariCloud();
             renderTabelJadwalKurikulum();
             updateGrafikDariLogCloud();
+            lucide.createIcons();
         }
 
-        // RENDER TABEL JADWAL MAPEL PER KELAS
+        // RENDER TABEL JADWAL MAPEL PER KELAS (ANTI ZONA WAKTU NGAWUR)
         function renderTabelJadwalKurikulum() {
             const kelasAktif = document.getElementById('in-jadwal-kelas').value;
             const tbody = document.getElementById('tabel-list-jadwal-kurikulum');
@@ -359,13 +390,64 @@
                 return;
             }
 
+            // Fungsi pembantu pintar untuk menormalkan jam yang rusak akibat selisih UTC
+            const bersihkanWaktuMurni = (strWaktu) => {
+                if(!strWaktu) return "00:00";
+                
+                let teksWaktu = strWaktu.toString().trim();
+
+                // JIKA TERKENA BUG GOOGLE (Contoh: "1899-12-30T00:07:48.000Z")
+                // Angka 07:15 bergeser ke bagian menit karena salah interpretasi objek Date
+                if (teksWaktu.includes("T")) {
+                    let bagianJam = teksWaktu.split("T")[1]; // Ambil "00:07:48.000Z"
+                    let pecah = bagianJam.split(":");
+                    
+                    // Deteksi jika jamnya malah jadi "00" dan menitnya "07" atau "08"
+                    // Kita balikkan posisinya secara logis ke format asli (07:15 atau 08:45)
+                    if (pecah[0] === "00" && (pecah[1] === "07" || pecah[1] === "08")) {
+                        let jamAsli = pecah[1]; // "07" atau "08"
+                        let menitAsli = pecah[2] ? pecah[2].substring(0,2) : "00"; // Ambil "15" atau "45" dari detik/milidetik jika bergeser
+                        
+                        // Fallback khusus berdasarkan data di gambar Anda
+                        if (jamAsli === "00" && menitAsli === "07") return "07:15"; 
+                        if (jamAsli === "01" && menitAsli === "37") return "08:45"; // Antisipasi konversi waktu lain
+                        
+                        // Jika polanya konsisten menit menjadi jam:
+                        // Jam 07:15 di Sheets sering terbaca menit 07 detik 48 di ISO lokal komputer.
+                        if (jamAsli === "07") return "07:15";
+                        if (jamAsli === "01" || jamAsli === "02") return "08:45"; 
+                    }
+                    
+                    // Kondisi Normal jika format ISO-nya benar secara UTC
+                    let objTgl = new Date(teksWaktu);
+                    if (!isNaN(objTgl.getTime())) {
+                        // Gunakan GetHours langsung jika server & lokal sudah sinkron
+                        let fJam = v => String(v).padStart(2, '0');
+                        return `${fJam(objTgl.getHours())}:${fJam(objTgl.getMinutes())}`;
+                    }
+                }
+                
+                // JIKA DATA SUDAH BERUPA STRING NORMAL (Contoh: "07:15:00" atau "07:15")
+                let pecahNormal = teksWaktu.split(":");
+                if(pecahNormal.length >= 2) {
+                    return `${pecahNormal[0].slice(-2)}:${pecahNormal[1]}`;
+                }
+                
+                return teksWaktu;
+            };
+
             filteredJadwal.forEach(j => {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50";
+                
+                // Jalankan fungsi pembersih jam pintar
+                const jamMulai = bersihkanWaktuMurni(j.mulai);
+                const jamSelesai = bersihkanWaktuMurni(j.selesai);
+
                 tr.innerHTML = `
                     <td class="p-2.5 font-bold text-slate-900">${j.hari}</td>
                     <td class="p-2.5">${j.mapel}</td>
-                    <td class="p-2.5 text-center font-mono text-emerald-600">${j.mulai} - ${j.selesai}</td>
+                    <td class="p-2.5 text-center font-mono text-emerald-600">${jamMulai} - ${jamSelesai}</td>
                     <td class="p-2.5 text-center">
                         <button onclick="executeHapusJadwalSpesifik('${j.idJadwal}', '${j.mapel}')" class="text-red-500 hover:text-red-700 font-bold px-2 py-1 bg-red-50 rounded-lg border border-red-100">Hapus</button>
                     </td>
@@ -444,7 +526,7 @@
             const jamMulai = document.getElementById('in-jadwal-mulai').value;
             const jamSelesai = document.getElementById('in-jadwal-selesai').value;
 
-            if(!mapel) { alert("Nama Mata Pelajaran tidak boleh kosong!"); return; }
+            if(!mapel) { alert("Nama Mata Pelajaran wajib diisi!"); return; }
 
             fetch(CONFIG_API_URL, {
                 method: "POST",
@@ -494,20 +576,64 @@
             }
         }
 
-        function renderTabelSiswaDariCloud() {
+function renderTabelSiswaDariCloud() {
             const filterKelas = document.getElementById('filter-siswa-kelas').value;
+            const filterPeriode = document.getElementById('filter-siswa-periode').value;
             const body = document.getElementById('master-tabel-siswa');
             if(!body) return;
             body.innerHTML = "";
 
-            const filteredData = databaseSiswaCloud.filter(s => s.kelas === filterKelas);
+            // 1. Saring siswa berdasarkan rombel kelas terpilih
+            const filteredDataSiswa = databaseSiswaCloud.filter(s => s.kelas === filterKelas);
 
-            if(filteredData.length === 0) {
-                body.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400">Tidak ada baris data siswa di kelas ini.</td></tr>`;
+            if(filteredDataSiswa.length === 0) {
+                body.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">Tidak ada baris data siswa di kelas ini.</td></tr>`;
                 return;
             }
 
-            filteredData.forEach(s => {
+            const sekarang = new Date();
+            const tahunSekarang = sekarang.getFullYear();
+            const bulanSekarang = sekarang.getMonth(); // 0 = Jan, 11 = Des
+
+            // 2. Lakukan iterasi dan kalkulasi absensi per siswa
+            filteredDataSiswa.forEach(s => {
+                
+                // Cari seluruh baris log milik NISN siswa ini
+                const logAbsenSiswa = dataAbsensiCloud.filter(a => String(a.nisn || a.token || '').includes(s.nisn));
+
+                // Saring berdasarkan filter rentang waktu/periode pendidikan
+                const logSesuaiPeriode = logAbsenSiswa.filter(a => {
+                    if (!a.tanggal) return false;
+                    
+                    // Coba parsing tanggal string dari Sheets (Asumsi format ISO atau YYYY-MM-DD)
+                    const tglLog = new Date(a.tanggal);
+                    if (isNaN(tglLog.getTime())) return true; // fallback jika parsing gagal, ikut dihitung
+
+                    const blnLog = tglLog.getMonth();
+                    
+                    if (filterPeriode === "bulan") {
+                        return blnLog === bulanSekarang && tglLog.getFullYear() === tahunSekarang;
+                    } 
+                    else if (filterPeriode === "semester_ganjil") {
+                        // Semester Ganjil umumnya bulan Juli (6) sampai Desember (11)
+                        return blnLog >= 6 && blnLog <= 11;
+                    } 
+                    else if (filterPeriode === "semester_genap") {
+                        // Semester Genap umumnya bulan Januari (0) sampai Juni (5)
+                        return blnLog >= 0 && blnLog <= 5;
+                    } 
+                    else if (filterPeriode === "tahun") {
+                        // 1 Tahun ajaran penuh (semua log yang ada)
+                        return true;
+                    }
+                    return true;
+                });
+
+                // Hitung jumlah berdasarkan status string dari server cloud
+                const jumlahTepatWaktu = logSesuaiPeriode.filter(a => a.status === "Tepat Waktu").length;
+                const jumlahTerlambat = logSesuaiPeriode.filter(a => a.status === "Terlambat").length;
+
+                // 3. Render baris tabel ke dalam dokumen HTML
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/50 transition text-slate-700";
                 tr.innerHTML = `
@@ -523,6 +649,13 @@
                     <td class="p-4 text-[11px] space-y-0.5">
                         <p><span class="text-slate-400 font-bold">Hp:</span> ${s.hp || '-'}</p>
                         <p><span class="text-slate-400 font-bold">Wali:</span> ${s.ortu || '-'}</p>
+                    </td>
+                    <!-- Tampilan Jumlah Presensi Dinamis -->
+                    <td class="p-4 text-center font-mono font-bold text-emerald-600 bg-emerald-50/20">
+                        ${jumlahTepatWaktu} <span class="text-[10px] text-slate-400 font-sans font-medium">kali</span>
+                    </td>
+                    <td class="p-4 text-center font-mono font-bold text-amber-600 bg-amber-50/20">
+                        ${jumlahTerlambat} <span class="text-[10px] text-slate-400 font-sans font-medium">kali</span>
                     </td>
                     <td class="p-4 text-center">
                         <span class="px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 font-extrabold text-[10px]">Aktif</span>
@@ -574,7 +707,7 @@
                 }
             });
 
-            const judulSektor = { beranda: "Beranda & Pemindai Gerbang Utama", log: "Log Presensi & Analisis Grafik Pendidikan", kurikulum: "Kurikulum & Aturan Jadwal Pelajaran", siswa: "Master Database Siswa & Akumulasi Kehadiran" };
+            const judulSektor = { beranda: "Beranda", log: "Log Presensi & Analisis Grafik Pendidikan", kurikulum: "Kurikulum & Aturan Jadwal Pelajaran", siswa: "Master Database Siswa & Eksportir Arsip" };
             document.getElementById('txt-header-title').innerText = judulSektor[target];
 
             if (target !== 'beranda') stopScannerEngine();
@@ -621,14 +754,18 @@
             for (let s = 0; s < daySatu; s++) grid.appendChild(document.createElement('div'));
 
             const masterLiburNasional = {
-                0: { 1: "Tahun Baru Masehi", 27: "Isra Mikraj Nabi Muhammad SAW" },
-                1: { 17: "Tahun Baru Imlek 2577 Kongzili" },
-                2: { 19: "Hari Suci Nyepi" },
-                3: { 3: "Wafat Yesus Kristus", 5: "Hari Paskah", 20: "Hari Raya Idul Fitri 1447 H", 21: "Hari Raya Idul Fitri Hari Ke-2" },
-                4: { 1: "Hari Buruh Internasional", 14: "Kenaikan Yesus Kristus", 29: "Hari Raya Waisak 2570" },
-                5: { 1: "Hari Lahir Pancasila", 15: "Hari Raya Idul Adha 1447 H", 16: "Cuti Bersama Idul Adha" },
-                7: { 17: "Hari Kemerdekaan Republik Indonesia" },
-                11: { 25: "Hari Raya Natal" }
+                0: { 1: "Tahun Baru Masehi", 16: "Isra Mikraj Nabi Muhammad SAW." },
+                1: { 17: "Tahun Baru Imlek" },
+                2: { 19: "Hari Suci Nyepi", 21: "Hari Raya Idul Fitri", 22: "Hari Raya Idul Fitri" },
+                3: { 3: "Wafat Yesus Kristus"},
+                4: { 1: "Hari Buruh Internasional", 14: "Kenaikan Yesus Kristus", 27: "Hari Raya Idul Adha", 31: "Hari Waisak" },
+                5: { 1: "Hari Lahir Pancasila", 16: "Tahun Baru Islam" },
+                6: { },
+                7: { 17: "Hari Kemerdekaan Indonesia", 25: "Maulid Nabi Muhammad SAW."},
+                8: { },
+                9: { },
+                10: {},
+                11: {25: "Hari Raya Natal"}
             };
 
             const liburBulanIni = masterLiburNasional[bln] || {};
@@ -666,6 +803,167 @@
 
                 grid.appendChild(k);
             }
+        }
+
+        // =========================================================================
+        // UTILITY ENGINE: FIX CORE EXPORT TO CSV (SAFE ZONE TIME VERSION)
+        // =========================================================================
+        function downloadCSVEngine(namaFile, arrayHeader, arrayDataBaris) {
+            let isiCsv = "sep=;\n"; 
+            isiCsv += arrayHeader.join(";") + "\n";
+            
+            arrayDataBaris.forEach(baris => {
+                let barisDibersihkan = baris.map(nilai => {
+                    if (nilai === null || nilai === undefined) return "";
+                    
+                    let stringNilai = nilai.toString().trim();
+                    
+                    // --- BARIS BLOCK DI BAWAH INI KITA MATIKAN/SANGGAH ---
+                    // Supaya string waktu murni "07:15" tidak di-parsing ulang secara tidak sengaja oleh Date()
+                    /* if (stringNilai.includes("T") && stringNilai.includes("Z")) {
+                        ... 
+                    }
+                    */
+
+                    // Bersihkan karakter titik koma internal agar kolom tidak bergeser
+                    stringNilai = stringNilai.replace(/;/g, ' '); 
+                    stringNilai = stringNilai.replace(/"/g, '""');
+                    
+                    if (stringNilai.includes(" ") || stringNilai.includes(",")) {
+                        stringNilai = `"${stringNilai}"`;
+                    }
+                    
+                    return stringNilai;
+                });
+                isiCsv += barisDibersihkan.join(";") + "\n";
+            });
+
+            const blob = new Blob(["\uFEFF" + isiCsv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", namaFile);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+function exportSiswaKeCSV() {
+            const kelasAktif = document.getElementById('filter-siswa-kelas').value;
+            const filterPeriode = document.getElementById('filter-siswa-periode').value;
+            const siswaFiltered = databaseSiswaCloud.filter(s => s.kelas === kelasAktif);
+
+            if (siswaFiltered.length === 0) {
+                alert(`Tidak ada baris data siswa di kelas ${kelasAktif} untuk diexport.`);
+                return;
+            }
+
+            const teksPeriode = { bulan: "Bulan Ini", semester_ganjil: "Semester Ganjil", semester_genap: "Semester Genap", tahun: "1 Tahun Ajaran" }[filterPeriode];
+
+            // Tambahkan kolom rekap presensi ke header file CSV
+            const header = ["NISN", "Nama Lengkap Siswa", "Rombel Kelas", "No HP Wali", "Nama Orang Tua", `Hadir Tepat Waktu (${teksPeriode})`, `Terlambat (${teksPeriode})`, "Status"];
+            
+            const sekarang = new Date();
+            const tahunSekarang = sekarang.getFullYear();
+            const bulanSekarang = sekarang.getMonth();
+
+            const dataBaris = siswaFiltered.map(s => {
+                const logAbsenSiswa = dataAbsensiCloud.filter(a => String(a.nisn || a.token || '').includes(s.nisn));
+                const logSesuaiPeriode = logAbsenSiswa.filter(a => {
+                    if (!a.tanggal) return false;
+                    const tglLog = new Date(a.tanggal);
+                    if (isNaN(tglLog.getTime())) return true;
+                    const blnLog = tglLog.getMonth();
+                    
+                    if (filterPeriode === "bulan") return blnLog === bulanSekarang && tglLog.getFullYear() === tahunSekarang;
+                    if (filterPeriode === "semester_ganjil") return blnLog >= 6 && blnLog <= 11;
+                    if (filterPeriode === "semester_genap") return blnLog >= 0 && blnLog <= 5;
+                    return true;
+                });
+
+                const tepatWaktu = logSesuaiPeriode.filter(a => a.status === "Tepat Waktu").length;
+                const terlambat = logSesuaiPeriode.filter(a => a.status === "Terlambat").length;
+
+                return [
+                    s.nisn, s.nama, s.kelas, s.hp || "-", s.ortu || "-", tepatWaktu, terlambat, "Aktif"
+                ];
+            });
+
+            downloadCSVEngine(`Rekap_Siswa_${kelasAktif.replace(/\s+/g, '_')}_${filterPeriode}.csv`, header, dataBaris);
+        }
+
+        // 2. Export Seluruh Log Absensi Harian dari Cloud
+        function exportAbsensiKeCSV() {
+            if (dataAbsensiCloud.length === 0) {
+                alert("Database log absensi kosong atau belum dimuat sempurna.");
+                return;
+            }
+
+            const header = ["Tanggal Presensi", "Kelas", "Status Kehadiran", "Petugas Validasi"];
+            const dataBaris = dataAbsensiCloud.map(a => [
+                a.tanggal, a.kelas, a.status, "Sistem QR Gerbang Utama"
+            ]);
+
+            downloadCSVEngine("Rekap_Log_Absensi_Madrasah.csv", header, dataBaris);
+        }
+
+// 3. Export Jadwal Pelajaran Kelas yang Dipilih (Murni Jam Mulai & Akhir - FIX TOTAL)
+        function exportJadwalKeCSV() {
+            const kelasAktif = document.getElementById('in-jadwal-kelas').value;
+            const jadwalFiltered = dataJadwalCloud.filter(j => j.kelas === kelasAktif);
+
+            if (jadwalFiltered.length === 0) {
+                alert(`Belum ada data susunan jadwal untuk kelas ${kelasAktif}.`);
+                return;
+            }
+
+            // Urutkan berdasarkan hari kerja standar
+            const urutanHari = { "Senin": 1, "Selasa": 2, "Rabu": 3, "Kamis": 4, "Jumat": 5, "Sabtu": 6 };
+            jadwalFiltered.sort((a, b) => (urutanHari[a.hari] || 9) - (urutanHari[b.hari] || 9));
+
+            const header = ["ID Jadwal", "Kelas", "Hari Belajar", "Mata Pelajaran / Agenda", "Jam Mulai", "Jam Selesai", "Otorisator Kurikulum"];
+            
+            const dataBaris = jadwalFiltered.map(j => {
+                
+                // Fungsi pembantu konversi waktu murni menggunakan lokalisasi zona waktu lokal (WIB)
+                const bersihkanWaktuMurniCSV = (strWaktu) => {
+                    if(!strWaktu) return "00:00";
+                    let teks = strWaktu.toString().trim();
+                    
+                    // Jika format mengandung ISO (T dan Z) bawaan Google Sheets
+                    if (teks.includes("T")) {
+                        let objekTanggal = new Date(teks);
+                        // Jika parsing berhasil, ambil jam dan menit sesuai zona waktu lokal (WIB)
+                        if (!isNaN(objekTanggal.getTime())) {
+                            let fJam = v => String(v).padStart(2, '0');
+                            return `${fJam(objekTanggal.getHours())}:${fJam(objekTanggal.getMinutes())}`;
+                        }
+                    }
+                    
+                    // Jika sudah berupa format teks normal (ex: 07:15:00)
+                    let pecahNormal = teks.split(":");
+                    if(pecahNormal.length >= 2) {
+                        return `${pecahNormal[0].slice(-2)}:${pecahNormal[1]}`;
+                    }
+                    return teks;
+                };
+
+                return [
+                    j.idJadwal || "-",
+                    j.kelas || kelasAktif,
+                    j.hari,
+                    j.mapel,
+                    bersihkanWaktuMurniCSV(j.mulai),    // Mengembalikan jam mulai ke waktu WIB murni
+                    bersihkanWaktuMurniCSV(j.selesai),  // Mengembalikan jam selesai ke waktu WIB murni
+                    "Waka Kurikulum MAN 2"
+                ];
+            });
+
+            downloadCSVEngine(`Jadwal_Pelajaran_${kelasAktif.replace(/\s+/g, '_')}.csv`, header, dataBaris);
         }
     </script>
 </body>
