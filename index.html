@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AbdiMadrasah PWA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#059669">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .splash-active { overflow: hidden; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
+
+    <!-- I. SPLASH SCREEN WINDOW -->
+    <div id="splashscreen" class="fixed inset-0 bg-gradient-to-br from-emerald-600 to-teal-800 z-50 flex flex-col items-center justify-center text-white transition-opacity duration-700 ease-in-out">
+        <div class="animate-bounce text-6xl mb-4">🕌</div>
+        <h1 class="text-3xl font-extrabold tracking-wider">AbdiMadrasah</h1>
+        <p class="text-emerald-200 text-sm mt-1 tracking-widest uppercase font-semibold">Smart Attendance System</p>
+        <div class="mt-8 w-16 h-1 bg-emerald-400/30 rounded-full overflow-hidden">
+            <div class="w-1/2 h-full bg-white rounded-full animate-[loading_1.5s_infinite_ease-in-out]"></div>
+        </div>
+    </div>
+    <style>
+        @keyframes loading { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+    </style>
+
+    <!-- II. HALAMAN PILIHAN PERAN -->
+    <div id="main-content" class="hidden bg-white w-full max-w-md p-8 rounded-3xl shadow-xl shadow-slate-200 border border-slate-100 text-center animate-[fadeIn_0.5s_ease-out]">
+        <div class="text-4xl mb-2">👋</div>
+        <h2 class="text-2xl font-bold text-slate-800">Selamat Datang</h2>
+        <p class="text-xs text-slate-400 mt-1">Silakan tentukan identitas penggunaan perangkat</p>
+
+        <!-- Pilihan Opsi -->
+        <div class="mt-6 space-y-3 text-left">
+            <label class="flex items-center justify-between p-4 border-2 border-slate-100 rounded-2xl cursor-pointer hover:border-emerald-500 hover:bg-emerald-50/30 transition group">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl group-hover:scale-110 transition">📊</span>
+                    <div>
+                        <p class="font-bold text-slate-800 text-sm">Akses Utama Admin</p>
+                        <p class="text-xs text-slate-400">Scan barcode kartu & kelola data</p>
+                    </div>
+                </div>
+                <input type="radio" name="peran" value="admin" class="w-5 h-5 text-emerald-600 focus:ring-emerald-500">
+            </label>
+
+            <label class="flex items-center justify-between p-4 border-2 border-slate-100 rounded-2xl cursor-pointer hover:border-emerald-500 hover:bg-emerald-50/30 transition group">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl group-hover:scale-110 transition">🧑‍🎓</span>
+                    <div>
+                        <p class="font-bold text-slate-800 text-sm">Akses Akun Siswa</p>
+                        <p class="text-xs text-slate-400">Unduh kartu QR & lihat riwayat hadir</p>
+                    </div>
+                </div>
+                <input type="radio" name="peran" value="siswa" class="w-5 h-5 text-emerald-600 focus:ring-emerald-500">
+            </label>
+        </div>
+
+        <!-- Ingat Saya Checkbox -->
+        <div class="flex items-center mt-5 text-left px-1">
+            <input id="ingat-saya" type="checkbox" class="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500 cursor-pointer">
+            <label for="ingat-saya" class="ml-2.5 text-xs text-slate-500 font-medium cursor-pointer select-none">Ingat pilihan saya di widget/perangkat ini</label>
+        </div>
+
+        <button onclick="pilihPeran()" class="w-full mt-6 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2">
+            <span>Lanjutkan Langkah</span> →
+        </button>
+    </div>
+
+    <script>
+        // Cek Auto-Redirect Berdasarkan Memori Widget PWA
+        const savedRole = localStorage.getItem('app_role');
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const splash = document.getElementById('splashscreen');
+                splash.classList.add('opacity-0');
+                
+                setTimeout(() => {
+                    splash.remove();
+                    if (savedRole === 'admin') {
+                        window.location.href = 'admin_dashboard.html';
+                    } else if (savedRole === 'siswa') {
+                        window.location.href = 'siswa_dashboard.html';
+                    } else {
+                        document.getElementById('main-content').classList.remove('hidden');
+                    }
+                }, 700);
+            }, 2000); // Durasi Tampilan Splashscreen 2 Detik
+        });
+
+        function pilihPeran() {
+            const selectedRadio = document.querySelector('input[name="peran"]:checked');
+            const rememberMe = document.getElementById('ingat-saya').checked;
+
+            if (!selectedRadio) {
+                alert("Pilih peran akses terlebih dahulu!");
+                return;
+            }
+
+            const role = selectedRadio.value;
+            if (rememberMe) {
+                localStorage.setItem('app_role', role);
+            }
+
+            if (role === 'admin') {
+                window.location.href = 'admin_dashboard.html';
+            } else {
+                window.location.href = 'siswa_dashboard.html';
+            }
+        }
+    </script>
+</body>
+</html>

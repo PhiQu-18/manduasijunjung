@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Siswa - MAN 2 Sijunjung</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        /* Dimensi Presisi Cetak Ukuran KTP Standard (85.6mm x 53.9mm) */
+        .ktp-card {
+            width: 340px;
+            height: 215px;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; padding: 0; }
+            .print-container { display: flex !important; flex-direction: column; gap: 30px; box-shadow: none !important; }
+            .ktp-card { border: 1px solid #cbd5e1 !important; box-shadow: none !important; page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
+
+    <div id="auth-gate" class="bg-white w-full max-w-md p-6 rounded-3xl shadow-xl shadow-slate-200/60 border border-slate-100 no-print animate-[fadeIn_0.4s_ease-out]">
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 bg-emerald-50 rounded-2xl mx-auto flex items-center justify-center text-3xl border border-emerald-100 mb-2">
+                <span>🕌</span>
+            </div>
+            <h2 class="text-xl font-bold text-slate-800 tracking-wide">MAN 2 Sijunjung</h2>
+            <p class="text-xs text-slate-400">Portal Pembuatan Kartu Presensi Digital</p>
+        </div>
+
+        <div class="flex bg-slate-100 p-1 rounded-xl mb-5 font-semibold text-xs sm:text-sm">
+            <button onclick="switchAuth('login')" id="tab-login" class="flex-1 py-2.5 rounded-lg bg-white text-slate-800 shadow-sm transition">Masuk</button>
+            <button onclick="switchAuth('daftar')" id="tab-daftar" class="flex-1 py-2.5 rounded-lg text-slate-500 hover:text-slate-800 transition">Daftar Akun</button>
+        </div>
+
+        <div id="form-login" class="space-y-4">
+            <div>
+                <label class="text-xs font-bold text-slate-500 block mb-1">NISN SISWA</label>
+                <input type="number" id="log-nisn" class="w-full p-3 border border-slate-200 rounded-xl outline-none text-sm focus:border-emerald-500 transition" placeholder="Masukkan NISN Anda">
+            </div>
+            <div>
+                <label class="text-xs font-bold text-slate-500 block mb-1">KATA SANDI</label>
+                <input type="password" id="log-pass" class="w-full p-3 border border-slate-200 rounded-xl outline-none text-sm focus:border-emerald-500 transition" placeholder="••••••••">
+            </div>
+            <button onclick="prosesLoginSiswa()" id="btn-login" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl text-sm transition mt-2 shadow-lg shadow-emerald-600/10">Masuk Aplikasi</button>
+        </div>
+
+        <div id="form-daftar" class="space-y-4 hidden">
+            <div>
+                <label class="text-xs font-bold text-slate-500 block mb-1">NOMOR NISN UTAMA</label>
+                <input type="number" id="daf-nisn" class="w-full p-3 border border-slate-200 rounded-xl outline-none text-sm focus:border-emerald-500 transition" placeholder="Validasi unik sistem">
+            </div>
+            <div>
+                <label class="text-xs font-bold text-slate-500 block mb-1">BUAT KATA SANDI</label>
+                <input type="password" id="daf-pass" class="w-full p-3 border border-slate-200 rounded-xl outline-none text-sm focus:border-emerald-500 transition" placeholder="Minimal 6 karakter">
+            </div>
+            <button onclick="prosesDaftarAwal()" id="btn-daftar" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 rounded-xl text-sm transition mt-2 shadow-md">Buat Akun Registrasi</button>
+        </div>
+    </div>
+
+
+    <div id="form-lengkap-data" class="bg-white w-full max-w-md p-6 rounded-3xl shadow-xl border border-slate-100 no-print hidden animate-[fadeIn_0.4s_ease-out]">
+        <div class="border-b border-slate-100 pb-3 mb-4">
+            <h3 class="font-bold text-lg text-slate-800">Lengkapi Profil Profil Anda</h3>
+            <p class="text-xs text-slate-400">Autentikasi lolos. Lengkapi instrumen fisik kartu di bawah.</p>
+        </div>
+        
+        <div class="space-y-3.5 text-sm">
+            <div>
+                <label class="text-xs font-bold text-slate-500 block mb-1">Nama Lengkap Siswa</label>
+                <input type="text" id="siswa-nama" class="w-full p-3 border border-slate-200 rounded-xl focus:border-emerald-500 outline-none transition" placeholder="Sesuai kartu keluarga">
+            </div>
+            
+            <div>
+                <label class="text-xs font-bold text-slate-500 block mb-1">Foto Profil Fisika Kartu</label>
+                <label class="flex items-center justify-center gap-2 p-3 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/50 cursor-pointer hover:bg-slate-100 transition text-slate-600 font-medium text-xs">
+                    📸 <span id="label-foto">Ambil Kamera / Pilih File Galeri</span>
+                    <input type="file" id="siswa-foto-file" accept="image/*" class="hidden" onchange="prosesKonversiFotoBase64(this)">
+                </label>
+                <div id="preview-foto-box" class="hidden mt-3 text-center">
+                    <img id="img-preview" class="w-14 h-18 object-cover mx-auto rounded-lg border shadow-sm">
+                    <p class="text-[10px] text-emerald-600 font-bold mt-1">✓ Foto Berhasil Dimuat</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="text-xs font-bold text-slate-500 block mb-1">No. HP Sendiri</label>
+                    <input type="tel" id="siswa-hp" class="w-full p-3 border border-slate-200 rounded-xl focus:border-emerald-500 outline-none" placeholder="08...">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-500 block mb-1">No. HP Orang Tua</label>
+                    <input type="tel" id="siswa-ortu" class="w-full p-3 border border-slate-200 rounded-xl focus:border-emerald-500 outline-none" placeholder="08...">
+                </div>
+            </div>
+            <div>
+                <label class="text-xs font-bold text-slate-500 block mb-1">Pilih Tingkat Kelas</label>
+                <select id="siswa-kelas" class="w-full p-3 border border-slate-200 rounded-xl focus:border-emerald-500 bg-white outline-none cursor-pointer">
+                    <option value="X - Merdeka 1">X - Merdeka 1</option>
+                    <option value="X - Merdeka 2">X - Merdeka 2</option>
+                    <option value="XI - Fisika 1">XI - Fisika 1</option>
+                    <option value="XII - IPS 1">XII - IPS 1</option>
+                </select>
+            </div>
+        </div>
+        
+        <button onclick="eksekusiKirimBiodata()" id="btn-submit-data" class="w-full mt-6 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl transition shadow-lg shadow-emerald-600/20 flex items-center justify-center">
+            Terbitkan Kartu Digital Anda
+        </button>
+    </div>
+
+
+    <div id="print-area" class="hidden flex-col md:flex-row gap-6 items-center justify-center print-container animate-[fadeIn_0.5s_ease-out]">
+        
+        <div id="ktp-depan" class="ktp-card bg-gradient-to-tr from-emerald-800 to-teal-950 rounded-2xl p-4 text-white shadow-xl relative overflow-hidden flex flex-col justify-between border border-emerald-700 select-none shrink-0">
+            <div class="absolute -right-10 -top-10 w-28 h-28 bg-white/5 rounded-full blur-xl pointer-events-none"></div>
+            
+            <div class="flex items-center gap-2 border-b border-white/20 pb-2">
+                <div class="w-7 h-7 bg-white/10 rounded-lg flex items-center justify-center text-md shrink-0">🕌</div>
+                <div>
+                    <h4 class="font-extrabold text-[10px] tracking-wider leading-tight">KARTU TANDA SISWA DIGITAL</h4>
+                    <p class="text-[8px] text-emerald-300 font-bold tracking-widest uppercase">MAN 2 SIJUNJUNG</p>
+                </div>
+            </div>
+            
+            <div class="flex gap-4 items-center my-auto">
+                <div id="card-frame-foto" class="w-18 h-24 bg-emerald-900/40 border border-white/20 rounded-lg flex flex-col items-center justify-center text-[8px] text-emerald-400 font-bold tracking-tighter shrink-0 overflow-hidden shadow-inner">
+                    👤 <br> NO FOTO
+                </div>
+                <div class="text-[9px] space-y-1.5 flex-1 min-w-0">
+                    <p class="font-bold text-sm truncate text-emerald-300 leading-none mb-1" id="v-nama">Nama Lengkap</p>
+                    <p><span class="opacity-50 inline-block w-12">NISN</span>: <span class="font-bold" id="v-nisn">-</span></p>
+                    <p><span class="opacity-50 inline-block w-12">Kelas</span>: <span class="font-bold" id="v-kelas">-</span></p>
+                    <p class="truncate"><span class="opacity-50 inline-block w-12">HP Siswa</span>: <span id="v-hp">-</span></p>
+                    <p class="truncate"><span class="opacity-50 inline-block w-12">HP Wali</span>: <span id="v-ortu">-</span></p>
+                </div>
+            </div>
+            <div class="text-[7px] text-emerald-400/90 text-center uppercase tracking-widest font-bold border-t border-white/10 pt-1.5">
+                Sistem Presensi Elektronik Berbasis Web PWA
+            </div>
+        </div>
+
+        <div id="ktp-belakang" class="ktp-card bg-white text-slate-800 rounded-2xl p-4 shadow-xl flex flex-col justify-between items-center border border-slate-200 select-none text-center shrink-0">
+            <div class="w-full border-b border-slate-100 pb-2">
+                <h4 class="font-bold text-[10px] text-slate-700 uppercase tracking-wider">Pindai Barcode Otomatis</h4>
+                <p class="text-[7.5px] text-slate-400">Arahkan sisi ini ke kamera depan admin gerbang madrasah</p>
+            </div>
+            
+            <div class="p-2 bg-slate-50 border border-slate-100 rounded-xl my-auto flex justify-center shadow-inner">
+                <svg id="barcode-canvas" class="max-w-full"></svg>
+            </div>
+
+            <div class="text-[7px] text-slate-400 font-medium max-w-[280px] leading-relaxed">
+                Kartu ini merupakan hak milik resmi MAN 2 Sijunjung. Apabila kartu ini ditemukan tercecer, mohon diserahkan kembali kepada pihak sekolah.
+            </div>
+        </div>
+
+        <div class="w-full md:w-auto flex md:flex-col gap-2 no-print self-stretch md:justify-center">
+            <button onclick="window.print()" class="flex-1 md:flex-initial bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3.5 rounded-xl text-xs transition shadow-md">🖨️ Cetak / Print Kartu</button>
+            <button onclick="keluarKeAwal()" class="bg-slate-200 hover:bg-slate-300 text-slate-600 font-bold px-4 py-3.5 rounded-xl text-xs transition">Keluar</button>
+        </div>
+    </div>
+
+
+    <script>
+        // !! PENTING: Ganti dengan Tautan Web App Deployment Google Apps Script Anda !!
+        const CONFIG_API_URL = "https://script.google.com/macros/s/AKfycbyPBpzT-TBh5Yunwvoqa4xlficmPyx_CGWbnZqd5V_OBgw773HcZ6ThyZo4tTwDrBDvNQ/exec";
+        
+        let globalNisn = "";
+        let base64FotoData = ""; // Penampung string teks gambar
+
+        // 1. Fungsi Navigasi Tab Auth Gate
+        function switchAuth(mode) {
+            if (mode === 'login') {
+                document.getElementById('form-login').classList.remove('hidden');
+                document.getElementById('form-daftar').classList.add('hidden');
+                document.getElementById('tab-login').className = "flex-1 py-2.5 rounded-lg bg-white text-slate-800 shadow-sm transition";
+                document.getElementById('tab-daftar').className = "flex-1 py-2.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
+            } else {
+                document.getElementById('form-daftar').classList.remove('hidden');
+                document.getElementById('form-login').classList.add('hidden');
+                document.getElementById('tab-daftar').className = "flex-1 py-2.5 rounded-lg bg-white text-slate-800 shadow-sm transition";
+                document.getElementById('tab-login').className = "flex-1 py-2.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
+            }
+        }
+
+        // 2. Alur API: Pendaftaran Awal (Hanya NISN + Sandi)
+        async function prosesDaftarAwal() {
+            const nisn = document.getElementById('daf-nisn').value.trim();
+            const pass = document.getElementById('daf-pass').value.trim();
+            const btn = document.getElementById('btn-daftar');
+
+            if (!nisn || pass.length < 6) {
+                alert("⚠️ Harap masukkan NISN dan Sandi minimal 6 karakter!");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Memeriksa Validasi...";
+
+            try {
+                const response = await fetch(CONFIG_API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "daftarAwalSiswa", nisn: nisn, password: pass })
+                });
+                const hasil = await response.json();
+
+                if (hasil.status === "success") {
+                    globalNisn = nisn;
+                    alert("🎉 Akun berhasil terdaftar! Silakan lengkapi instrumen profil Anda pada lembar berikutnya.");
+                    document.getElementById('auth-gate').remove();
+                    document.getElementById('form-lengkap-data').classList.remove('hidden');
+                } else {
+                    alert("❌ " + hasil.msg);
+                    btn.disabled = false;
+                    btn.innerText = "Buat Akun Registrasi";
+                }
+            } catch (err) {
+                alert("❌ Gangguan internet terdeteksi!");
+                btn.disabled = false;
+                btn.innerText = "Buat Akun Registrasi";
+            }
+        }
+
+        // 3. Alur API: Proses Login Siswa
+        async function prosesLoginSiswa() {
+            const nisn = document.getElementById('log-nisn').value.trim();
+            const pass = document.getElementById('log-pass').value.trim();
+            const btn = document.getElementById('btn-login');
+
+            if (!nisn || !pass) { alert("⚠️ Isi bidang NISN dan Sandi!"); return; }
+
+            btn.disabled = true;
+            btn.innerText = "Memetakan Akun...";
+
+            try {
+                const response = await fetch(CONFIG_API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "loginSiswa", nisn: nisn, password: pass })
+                });
+                const hasil = await response.json();
+
+                if (hasil.status === "success") {
+                    globalNisn = nisn;
+                    document.getElementById('auth-gate').remove();
+                    
+                    if (hasil.sudahLengkap) {
+                        // Jika di database sudah ada datanya, langsung munculkan kartu KTP digital
+                        tampilkanKartuFisik(hasil.biodata.nama, hasil.biodata.kelas, hasil.biodata.hp, hasil.biodata.ortu, hasil.biodata.token, hasil.biodata.foto);
+                    } else {
+                        // Jika belum ada biodata lengkap, arahkan ke form pengisian
+                        document.getElementById('form-lengkap-data').classList.remove('hidden');
+                    }
+                } else {
+                    alert("❌ " + hasil.msg);
+                    btn.disabled = false;
+                    btn.innerText = "Masuk Aplikasi";
+                }
+            } catch (err) {
+                alert("❌ Gagal menyambung ke server cloud!");
+                btn.disabled = false;
+                btn.innerText = "Masuk Aplikasi";
+            }
+        }
+
+        // 4. Input Foto: Konversi ke Base64 Teks & Set Mini Preview
+        function prosesKonversiFotoBase64(input) {
+            const file = input.files[0];
+            if (file) {
+                document.getElementById('label-foto').innerText = "Kamera/File Terkunci";
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    base64FotoData = e.target.result;
+                    const imgPre = document.getElementById('img-preview');
+                    imgPre.src = base64FotoData;
+                    document.getElementById('preview-foto-box').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // 5. Alur API: Mengirim Data Lengkap Profil Akhir Siswa
+        async function eksekusiKirimBiodata() {
+            const nama = document.getElementById('siswa-nama').value.trim();
+            const hpSiswa = document.getElementById('siswa-hp').value.trim();
+            const hpOrtu = document.getElementById('siswa-ortu').value.trim();
+            const kelas = document.getElementById('siswa-kelas').value;
+            const btn = document.getElementById('btn-submit-data');
+
+            if (!nama || !hpSiswa || !hpOrtu) { alert("⚠️ Mohon isi seluruh instrumen formulir!"); return; }
+
+            btn.disabled = true;
+            btn.innerText = "Menyimpan Dokumen Ke Cloud...";
+
+            // Formula Pembuatan Kode Token Barcode Kriptografi Khas MAN 2 Sijunjung
+            const tokenBarcode = `MAN2SJ-${globalNisn}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
+
+            try {
+                const response = await fetch(CONFIG_API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        action: "lengkapiBiodata",
+                        nisn: globalNisn,
+                        nama: nama,
+                        hpSiswa: hpSiswa,
+                        hpOrtu: hpOrtu,
+                        kelas: kelas,
+                        token: tokenBarcode,
+                        fotoBase64: base64FotoData
+                    })
+                });
+                const hasil = await response.json();
+
+                if (hasil.status === "success") {
+                    document.getElementById('form-lengkap-data').remove();
+                    tampilkanKartuFisik(nama, kelas, hpSiswa, hpOrtu, tokenBarcode, base64FotoData);
+                    aktifkanPwaNotificationAlarm();
+                } else {
+                    alert("❌ Penyimpanan gagal: " + hasil.msg);
+                    btn.disabled = false;
+                    btn.innerText = "Terbitkan Kartu Digital Anda";
+                }
+            } catch (err) {
+                alert("❌ Galat koneksi internet!");
+                btn.disabled = false;
+                btn.innerText = "Terbitkan Kartu Digital Anda";
+            }
+        }
+
+        // 6. Sinkronisasi Data ke Sektor Tampilan Kartu KTP Dua Sisi
+        function tampilkanKartuFisik(nama, kelas, hp, ortu, token, foto) {
+            document.getElementById('v-nama').innerText = nama;
+            document.getElementById('v-nisn').innerText = globalNisn;
+            document.getElementById('v-kelas').innerText = kelas;
+            document.getElementById('v-hp').innerText = hp;
+            document.getElementById('v-ortu').innerText = ortu;
+
+            if (foto) {
+                document.getElementById('card-frame-foto').innerHTML = `<img src="${foto}" class="w-full h-full object-cover">`;
+            }
+
+            // Memanggil Generator JsBarcode ke Target Canvas Belakang Kartu
+            JsBarcode("#barcode-canvas", token, {
+                format: "CODE128",
+                width: 1.8,
+                height: 42,
+                displayValue: true,
+                fontSize: 9,
+                lineColor: "#022c22"
+            });
+
+            // Tampilkan Layout Dua Sisi Kartu KTP
+            document.getElementById('print-area').classList.remove('hidden');
+            document.getElementById('print-area').classList.add('flex');
+        }
+
+        // 7. Fitur Alarm Push Notifikasi PWA Pengingat Baris Masuk Kelas
+        function aktifkanPwaNotificationAlarm() {
+            if ("Notification" in window) {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        setInterval(() => {
+                            const now = new Date();
+                            // Alarm terpicu otomatis setiap hari belajar pukul 07.00 pagi waktu setempat
+                            if (now.getHours() === 7 && now.getMinutes() === 0) {
+                                new Notification("🚨 Peringatan Presensi MAN 2 Sijunjung", {
+                                    body: "Assalamu'alaikum, Waktu apel berbaris segera dimulai. Pastikan kartu KTP digital Anda sudah siap scan di pintu masuk!",
+                                    icon: "https://cdn-icons-png.flaticon.com/512/3000/3000171.png"
+                                });
+                            }
+                        }, 60000);
+                    }
+                });
+            }
+        }
+
+        function keluarKeAwal() {
+            localStorage.removeItem('app_role');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
