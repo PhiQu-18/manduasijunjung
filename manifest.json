@@ -1,0 +1,21 @@
+{
+  "short_name": "Portal MAN2",
+  "name": "Portal Akademik Mandiri MAN 2 Sijunjung",
+  "icons": [
+    {
+      "src": "./foto/1.webp",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "./foto/1.webp",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "siswa.html",
+  "background_color": "#065f46",
+  "theme_color": "#065f46",
+  "display": "standalone",
+  "orientation": "portrait"
+}
