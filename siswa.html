@@ -760,8 +760,83 @@
     }
 
     /* =========================================================================
-       ALGORITMA INTELLIGENT REAL-TIME NOTIFICATION & ALARM TRACKER
+       ALGORITMA INTELLIGENT NOTIFIKASI LAYAR PERANGKAT & AUDIO REAL-TIME
     ========================================================================= */
+
+    let audioContextInstance = null;
+    let alarmSudahBunyi = false;
+
+    // 1. MINTA IZIN NOTIFIKASI PERANGKAT SAAT DOM SIAP
+    document.addEventListener("DOMContentLoaded", function() {
+      if ("Notification" in window) {
+        if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+          Notification.requestPermission();
+        }
+      }
+    });
+
+    // 2. FUNGSI BUNYI DERING NYARING (Efek Pesan Masuk Digital)
+    function putarSuaraNotifikasi() {
+      try {
+        if (!audioContextInstance) {
+          audioContextInstance = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        const ctx = audioContextInstance;
+        if (ctx.state === 'suspended') ctx.resume();
+
+        // Nada Pertama (Tinggi Singkat)
+        let osc1 = ctx.createOscillator();
+        let gain1 = ctx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(987.77, ctx.currentTime); // Nada B5
+        gain1.gain.setValueAtTime(0.4, ctx.currentTime);
+        gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+        osc1.connect(gain1);
+        gain1.connect(ctx.destination);
+        osc1.start();
+        osc1.stop(ctx.currentTime + 0.1);
+
+        // Nada Kedua (Lebih Tinggi & Berdering - Jeda 80ms)
+        setTimeout(() => {
+          let osc2 = ctx.createOscillator();
+          let gain2 = ctx.createGain();
+          osc2.type = 'sine';
+          osc2.frequency.setValueAtTime(1318.51, ctx.currentTime); // Nada E6
+          gain2.gain.setValueAtTime(0.5, ctx.currentTime);
+          gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+          osc2.connect(gain2);
+          gain2.connect(ctx.destination);
+          osc2.start();
+          osc2.stop(ctx.currentTime + 0.3);
+        }, 80);
+
+      } catch (e) {
+        console.log("Audio diblokir kebijakan browser sebelum interaksi.", e);
+      }
+    }
+
+    // 3. FUNGSI KIRIM NOTIFIKASI POP-UP KE PERANGKAT (SYSTEM BANNER)
+    function kirimNotifikasiKePerangkat(judul, pesan) {
+      // Jalankan suara dering
+      putarSuaraNotifikasi();
+
+      if ("Notification" in window && Notification.permission === "granted") {
+        const opsiNotif = {
+          body: pesan,
+          icon: "logo.png",
+          vibrate: [200, 100, 200],
+          requireInteraction: true
+        };
+
+        const notif = new Notification(judul, opsiNotif);
+        notif.onclick = function() {
+          window.focus();
+          this.close();
+        };
+      }
+    }
+
+    // 4. ENGINE MONITORING UTAMA JADWAL MASUK PAGI
     function initCalendarAndTracker() {
       const elHari = document.getElementById('kalenderHari');
       const elJam = document.getElementById('kalenderJam');
@@ -772,58 +847,12 @@
         const d = new Date();
         if(elHari) elHari.textContent = namaHari[d.getDay()] + ", " + d.getDate() + " " + namaBulan[d.getMonth()] + " " + d.getFullYear();
         if(elJam) elJam.textContent = "Waktu: " + String(d.getHours()).padStart(2, '0') + ":" + String(d.getMinutes()).padStart(2, '0') + ":" + String(d.getSeconds()).padStart(2, '0') + " WIB";
-        
-        // Evaluasi notifikasi setiap detik
+
         prosesNotifikasiPelajaran();
       }, 1000);
     }
 
-    let audioContextInstance = null;
-    let alarmSudahBunyi = false; // Mencegah bunyi berulang-ulang setiap detik
-
-    // Fungsi menghasilkan bunyi dering notifikasi aplikasi (Bleep Digital)
-    function putarSuaraNotifikasi() {
-      try {
-        if (!audioContextInstance) {
-          audioContextInstance = new (window.AudioContext || window.webkitAudioContext)();
-        }
-
-        const ctx = audioContextInstance;
-        if (ctx.state === 'suspended') ctx.resume();
-
-        // Nada 1 (Low Beep)
-        let osc1 = ctx.createOscillator();
-        let gain1 = ctx.createGain();
-        osc1.type = 'sine';
-        osc1.frequency.setValueAtTime(880, ctx.currentTime); // Nada A5
-        gain1.gain.setValueAtTime(0.3, ctx.currentTime);
-        gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
-        osc1.connect(gain1);
-        gain1.connect(ctx.destination);
-        osc1.start();
-        osc1.stop(ctx.currentTime + 0.15);
-
-        // Nada 2 (High Beep setelah jeda 100ms)
-        setTimeout(() => {
-          let osc2 = ctx.createOscillator();
-          let gain2 = ctx.createGain();
-          osc2.type = 'sine';
-          osc2.frequency.setValueAtTime(1200, ctx.currentTime); // Nada Tinggi
-          gain2.gain.setValueAtTime(0.4, ctx.currentTime);
-          gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
-          osc2.connect(gain2);
-          gain2.connect(ctx.destination);
-          osc2.start();
-          osc2.stop(ctx.currentTime + 0.25);
-        }, 100);
-
-      } catch (e) {
-        console.log("Audio play diblokir browser, butuh interaksi user pertama kali.", e);
-      }
-    }
-
     function prosesNotifikasiPelajaran() {
-      // Pastikan jadwal hari ini sudah termuat di browser
       if (!listJadwalHariIniGlobal || listJadwalHariIniGlobal.length === 0) {
         setWidgetAlarmStandby();
         return;
@@ -834,25 +863,22 @@
       const menitSekarang = sekarang.getMinutes();
       const totalMenitSekarang = (jamSekarang * 60) + menitSekarang;
 
-      // 1. Cari tahu jam mulai dari Mata Pelajaran Pertama hari ini
       const mapelPertama = listJadwalHariIniGlobal[0];
       const tMulaiPertama = mapelPertama.mulaiClean.split(":");
       const menitMulaiPertama = (parseInt(tMulaiPertama[0]) * 60) + parseInt(tMulaiPertama[1]);
 
-      // Ambil elemen DOM visual Alarm Box
       const alarmBox = document.getElementById('scanAlarmBox');
       const alarmIconWadah = document.getElementById('scanAlarmIconWadah');
       const alarmIcon = document.getElementById('scanAlarmIcon');
       const alarmTitle = document.getElementById('scanAlarmTitle');
       const alarmDesc = document.getElementById('scanAlarmDesc');
 
-      // 2. Evaluasi Kondisi Pagi Hari (Sebelum Jam Pelajaran Pertama Dimulai)
+      // KONDISI PAGI HARI (Sebelum jam pelajaran pertama dimulai)
       if (totalMenitSekarang < menitMulaiPertama) {
         const sisaMenitKeMulai = menitMulaiPertama - totalMenitSekarang;
 
-        // JIKA MASUK 10 MENIT TERAKHIR SEBELUM MAPEL 1 (Fase Kritis Absen Pagi)
+        // MASUK 10 MENIT TERAKHIR GERBANG ABSENSI MASUK PAGI
         if (sisaMenitKeMulai <= 10 && sisaMenitKeMulai > 0) {
-          // AKTIFKAN VISUAL BERKEDIP (PULSING)
           if(alarmBox) alarmBox.className = "scan-warning-active p-4 rounded-2xl border-2 shadow-md flex items-start gap-3 transition-all duration-300";
           if(alarmIconWadah) alarmIconWadah.className = "w-10 h-10 bg-rose-600 text-white rounded-xl flex items-center justify-center flex-shrink-0 animate-pulse";
           if(alarmIcon) alarmIcon.className = "fa-solid fa-triangle-exclamation text-sm";
@@ -862,18 +888,17 @@
           }
           if(alarmDesc) {
             alarmDesc.className = "text-[10px] text-rose-600 font-extrabold mt-0.5";
-            alarmDesc.textContent = `Waktu sisa ${sisaMenitKeMulai} menit lagi sebelum kelas pertama [${mapelPertama.Mata_Pelajaran || mapelPertama.mapel}] dimulai. Segera scan QR Absensi Masuk Anda!`;
+            alarmDesc.textContent = `Waktu sisa ${sisaMenitKeMulai} menit lagi sebelum kelas pertama [${mapelPertama.Mata_Pelajaran || mapelPertama.mapel}] dimulai. Segera lakukan scan QR Absensi Masuk!`;
           }
 
-          // BUNYIKAN DERING ALARM (Setiap menit berganti di 10 menit terakhir)
           if (!alarmSudahBunyi) {
-            putarSuaraNotifikasi();
-            alarmSudahBunyi = true; // Kunci agar tidak berdering berisik setiap detik
+            let judulPesan = "MAN 2 Sijunjung - Absen Pagi!";
+            let isiPesan = `Tersisa ${sisaMenitKeMulai} menit lagi sebelum pelajaran dimulai. Silakan scan QR KTS Anda sekarang!`;
+            kirimNotifikasiKePerangkat(judulPesan, isiPesan);
+            alarmSudahBunyi = true;
           }
-        }
-        // JIKA MASIH PAGI TAPI DI ATAS 10 MENIT SEBELUM MASUK
-        else {
-          alarmSudahBunyi = false; // Reset trigger alarm suara
+        } else {
+          alarmSudahBunyi = false;
           if(alarmBox) alarmBox.className = "bg-amber-50/50 p-4 rounded-2xl border border-amber-200 shadow-sm flex items-start gap-3 transition-all duration-300";
           if(alarmIconWadah) alarmIconWadah.className = "w-10 h-10 bg-amber-500 text-white rounded-xl flex items-center justify-center flex-shrink-0";
           if(alarmIcon) alarmIcon.className = "fa-solid fa-user-clock text-sm";
@@ -883,16 +908,12 @@
           }
           if(alarmDesc) {
             alarmDesc.className = "text-[10px] text-amber-700 font-semibold mt-0.5";
-            alarmDesc.textContent = `Gerbang absensi pagi dibuka. Pelajaran pertama dimulai pukul ${mapelPertama.mulaiClean} WIB (${sisaMenitKeMulai} menit menuju jam masuk).`;
+            alarmDesc.textContent = `Pelajaran pertama dimulai pukul ${mapelPertama.mulaiClean} WIB (${sisaMenitKeMulai} menit menuju jam masuk).`;
           }
         }
+      } else {
+        alarmSudahBunyi = false;
 
-      } 
-      // 3. JIKA SUDAH MELEWATI JAM MULAI PELAJARAN PERTAMA (Fase Siang/KBM Berjalan)
-      else {
-        alarmSudahBunyi = false; // Reset trigger alarm suara
-
-        // Cari tahu apakah saat ini ada kelas yang sedang berjalan atau tidak untuk sekadar info teks
         let kelasAktifSaatIni = null;
         listJadwalHariIniGlobal.forEach(j => {
           const tMulai = j.mulaiClean.split(":");
@@ -916,17 +937,17 @@
           if (kelasAktifSaatIni) {
             alarmDesc.textContent = `Absen pagi selesai. Saat ini berlangsung mapel: [${kelasAktifSaatIni.Mata_Pelajaran || kelasAktifSaatIni.mapel}] s.d pukul ${kelasAktifSaatIni.selesaiClean} WIB.`;
           } else {
-            alarmDesc.textContent = "Fase absensi pagi telah berlalu. Jam operasional pengerjaan/istirahat normal madrasah.";
+            alarmDesc.textContent = "Fase absensi pagi telah berlalu. Jam operasional KBM / istirahat normal madrasah.";
           }
         }
       }
 
-      // Reset state alarmSudahBunyi ketika detik kembali ke :00 agar menit berikutnya bisa bunyi lagi jika masih di area 10 menit
+      // Reset gate kunci bunyi setiap kali pergantian menit (detik ke :00)
       if (sekarang.getSeconds() === 0) {
         alarmSudahBunyi = false;
       }
 
-      // --- SCRIPT UPDATE COLOR-BADGE JADWAL KBM DI HALAMAN SEPERTI BIASA ---
+      // --- SINKRONISASI BADGE DAFTAR MAPEL HARI INI ---
       listJadwalHariIniGlobal.forEach((j, idx) => {
         const tMulai = j.mulaiClean.split(":");
         const tSelesai = j.selesaiClean.split(":");
@@ -952,6 +973,7 @@
         }
       });
     }
+
 
     function setWidgetAlarmStandby() {
       const alarmBox = document.getElementById('scanAlarmBox');
