@@ -303,7 +303,7 @@ body {
 .real-camera-box {
     width: 100%;
     max-width: 420px;
-    aspect-ratio: 1.5 / 1;         /* Di layar kecil, rasio kotak persegi (1:1) lebih hemat tempat */
+    aspect-ratio: 1 / 1;         /* Di layar kecil, rasio kotak persegi (1:1) lebih hemat tempat */
     background-color: #0f172a;
     border-radius: 12px;
     overflow: hidden;
@@ -315,7 +315,7 @@ body {
 
 @media (min-width: 768px) {
     .real-camera-box {
-        aspect-ratio: 4 / 3;     /* Di layar PC kembali ke rasio ideal horizontal webcam */
+        aspect-ratio: 5.5 / 3.5;     /* Di layar PC kembali ke rasio ideal horizontal webcam */
         margin-bottom: 20px;
     }
 }
