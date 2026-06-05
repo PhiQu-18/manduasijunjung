@@ -3,16 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Admin - MAN 2 Sijunjung Plus Keterampilan</title>
+    <title>Admin - MAN 2 Sijunjung Plus Keterampilan</title>
+    
+    <link rel="icon" type="image/png" href="./foto/1.webp"> 
+    
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 <body>
 
     <div id="splash-screen" class="splash-wrapper">
         <div class="splash-content">
-            <div class="splash-logo">
-                <i class="fa-solid fa-graduation-cap"></i>
+            <div class="splash-logo-container">
+                <img src="./foto/1.webp" alt="Logo MAN 2 Sijunjung" class="splash-img-logo">
             </div>
             <h1 class="splash-title">MAN 2 Sijunjung</h1>
             <p class="splash-subtitle">Plus Keterampilan</p>
@@ -22,7 +26,8 @@
 
     <header class="topbar">
         <div class="logo-area">
-            <i class="fa-solid fa-graduation-cap logo-icon"></i>
+            <img src="./foto/1.webp" alt="Logo MAN 2 Sijunjung" class="topbar-img-logo">
+            
             <div>
                 <h1>MAN 2 Sijunjung Plus Keterampilan</h1>
                 <p id="current-date">Memuat waktu harian...</p>
@@ -50,26 +55,13 @@
         <section id="tab-beranda" class="tab-content active">
             <div class="grid-beranda">
                 <div class="card card-scanner">
-                    <h3><i class="fa-solid fa-camera"></i> Kontrol Kamera Scanner</h3>
-                    <p class="desc">Aktifkan modul kamera harian untuk membaca barcode / QR Code kartu siswa fisik.</p>
+                    <h3><i class="fa-solid fa-camera"></i> Live Kamera Scanner QR</h3>
+                    <p class="desc">Arahkan QR Code Kartu Siswa ke area sorotan kamera di bawah ini.</p>
                     
-                    <div class="camera-box" id="camera-viewport">
-                        <div class="camera-placeholder">
-                            <i class="fa-solid fa-video-slash"></i>
-                            <p>Kamera Dinonaktifkan</p>
-                        </div>
-                    </div>
+                    <div id="camera-reader" class="real-camera-box"></div>
                     
                     <div class="camera-controls">
-                        <button id="btn-toggle-camera" class="btn btn-primary"><i class="fa-solid fa-power-off"></i> Aktifkan Kamera</button>
-                    </div>
-
-                    <div class="form-group" style="margin-top: 20px; border-top: 1px dashed var(--border-color); padding-top: 15px;">
-                        <label>Simulasi Manual Scan (Ketik Kode Unik Kartu)</label>
-                        <div class="input-inline">
-                            <input type="text" id="scan-manual-input" placeholder="Contoh: M2SPKXE1-1">
-                            <button id="btn-submit-scan" class="btn btn-success"><i class="fa-solid fa-arrow-right-to-bracket"></i> Scan</button>
-                        </div>
+                        <button id="btn-toggle-camera" class="btn btn-primary"><i class="fa-solid fa-video"></i> Aktifkan Kamera</button>
                     </div>
                 </div>
 
@@ -173,7 +165,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Nama Panjang Kelas</label>
-                                <input type="text" id="input-nama-kelas" placeholder="Contoh: Sepuluh Elemen Kejuruan 1" required>
+                                <input type="text" id="input-nama-kelas" placeholder="Contoh: Fisika" required>
                             </div>
                             <button type="submit" id="btn-submit-kelas" class="btn btn-primary">Simpan Ruang Kelas</button>
                         </form>
@@ -218,10 +210,24 @@
                 </div>
 
                 <div>
-                    <div class="card-filter-bar" style="grid-template-columns: 1fr;">
+                    <div class="card-filter-bar" style="grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div class="filter-group">
-                            <label><i class="fa-solid fa-magnifying-glass"></i> Pencarian Global & Filter Jadwal / Kelas</label>
-                            <input type="text" id="search-master-input" placeholder="Ketik kata kunci pencarian (nama mapel, hari, kelas)...">
+                            <label><i class="fa-solid fa-school"></i> Filter Berdasarkan Kelas</label>
+                            <select id="select-filter-master-kelas">
+                                <option value="ALL">Semua Kelas</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label><i class="fa-solid fa-calendar-day"></i> Filter Berdasarkan Hari</label>
+                            <select id="select-filter-master-hari">
+                                <option value="ALL">Semua Hari</option>
+                                <option value="Senin">Senin</option>
+                                <option value="Selasa">Selasa</option>
+                                <option value="Rabu">Rabu</option>
+                                <option value="Kamis">Kamis</option>
+                                <option value="Jumat">Jumat</option>
+                                <option value="Sabtu">Sabtu</option>
+                            </select>
                         </div>
                     </div>
 
