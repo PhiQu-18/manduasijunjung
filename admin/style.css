@@ -303,7 +303,7 @@ body {
 .real-camera-box {
     width: 100%;
     max-width: 420px;
-    aspect-ratio: 3 / 1;         /* Di layar kecil, rasio kotak persegi (1:1) lebih hemat tempat */
+    aspect-ratio: 1.5 / 1;         /* Di layar kecil, rasio kotak persegi (1:1) lebih hemat tempat */
     background-color: #0f172a;
     border-radius: 12px;
     overflow: hidden;
