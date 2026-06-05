@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAN 2 Sijunjung Smart Engine - Laman Siswa</title>
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <div id="statusbar-notification" class="sys-notification-bar">
+        <i class="fa-solid fa-bell-ring noti-icon" id="noti-icon-element"></i>
+        <div class="noti-body">
+            <h5 id="noti-title">Sistem Pemberitahuan</h5>
+            <p id="noti-text">Ada info baru masuk ke akun Anda.</p>
+        </div>
+    </div>
+
+    <div class="splash-wrapper" id="splash-screen">
+        <div class="splash-content">
+            <div class="splash-logo-container">
+                <img src="https://via.placeholder.com/120" alt="Logo Sekolah" class="splash-img-logo" onerror="this.src='https://img.icons8.com/color/120/school.png'">
+            </div>
+            <div class="splash-title">MAN 2 SIJUNJUNG</div>
+            <div class="splash-subtitle">Plus Keterampilan • Smart Engine</div>
+            <div class="splash-loader"></div>
+        </div>
+    </div>
+
+    <div class="auth-container" id="auth-section" style="display: none;">
+        <div class="card auth-card">
+            <div class="auth-tabs">
+                <button class="auth-tab-btn active" onclick="switchAuthTab('login')">Masuk (Login)</button>
+                <button class="auth-tab-btn" onclick="switchAuthTab('register')">Daftar Akun</button>
+            </div>
+
+            <form id="form-login" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label><i class="fa-solid fa-id-card"></i> NISN Siswa</label>
+                    <input type="text" id="login-nisn" placeholder="Masukkan 10 digit NISN" required pattern="\d+">
+                </div>
+                <div class="form-group">
+                    <label><i class="fa-solid fa-lock"></i> Kata Sandi (Password)</label>
+                    <input type="password" id="login-pwd" class="custom-input-style" placeholder="Masukkan password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full"><i class="fa-solid fa-right-to-bracket"></i> Masuk Sekarang</button>
+            </form>
+
+            <form id="form-register" onsubmit="handleRegister(event)" style="display: none;">
+                <div class="form-group">
+                    <label><i class="fa-solid fa-id-card"></i> NISN Siswa baru</label>
+                    <input type="text" id="reg-nisn" placeholder="Buat NISN (Contoh: 0012345678)" required pattern="\d+">
+                </div>
+                <div class="form-group">
+                    <label><i class="fa-solid fa-lock"></i> Buat Kata Sandi</label>
+                    <input type="password" id="reg-pwd" class="custom-input-style" placeholder="Minimal 6 Karakter" required>
+                </div>
+                <button type="submit" class="btn btn-success btn-full"><i class="fa-solid fa-user-plus"></i> Konfirmasi & Lanjutkan</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="auth-container" id="profile-completion-section" style="display: none;">
+        <div class="card auth-card">
+            <h3 class="text-center"><i class="fa-solid fa-user-gear text-primary"></i> Lengkapi Profil Anda</h3>
+            <p class="desc text-center">Silakan lengkapi identitas untuk mengaktifkan kartu digital siswa.</p>
+            
+            <form id="form-complete-profile" onsubmit="saveCompleteProfile(event)">
+                <div class="selfie-box">
+                    <i class="fa-solid fa-user-astronaut fa-2x text-muted" id="selfie-placeholder"></i>
+                    <img id="selfie-img-view" class="selfie-preview" alt="Preview Foto">
+                </div>
+                <div class="selfie-btn-group">
+                    <button type="button" class="btn btn-secondary-gray" onclick="triggerCamera()"><i class="fa-solid fa-camera"></i> Kamera</button>
+                    <button type="button" class="btn btn-light-gray" onclick="document.getElementById('file-avatar').click()"><i class="fa-solid fa-image"></i> Galeri</button>
+                    <input type="file" id="file-avatar" accept="image/*" style="display: none;" onchange="loadAvatarFile(event)">
+                </div>
+
+                <div class="form-group">
+                    <label>Nama Lengkap Siswa</label>
+                    <input type="text" id="setup-nama" placeholder="Sesuai ijazah resmi" required>
+                </div>
+                <div class="form-group">
+                    <label>NISN</label>
+                    <input type="text" id="setup-nisn" readonly class="readonly-input">
+                </div>
+                <div class="form-group">
+                    <label>Nama Sekolah</label>
+                    <input type="text" value="MAN 2 Sijunjung Plus Keterampilan" readonly class="readonly-input font-semibold">
+                </div>
+                <div class="form-group">
+                    <label>Pilih Kelas</label>
+                    <select id="setup-kelas" required>
+                        <option value="">-- Pilih Ruang Kelas --</option>
+                        <option value="X.1">X.1 (Sains Energi)</option>
+                        <option value="X.2">X.2 (Sosial Humaniora)</option>
+                        <option value="XI.MIPA.1">XI MIPA 1 (Plus Robotik)</option>
+                        <option value="XI.MIPA.2">XI MIPA 2</option>
+                        <option value="XII.MIPA.1">XII MIPA 1</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Nomor HP Aktif (WhatsApp)</label>
+                    <input type="text" id="setup-hp" placeholder="08xxxxxxxxxx" required pattern="08\d+">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full"><i class="fa-solid fa-id-badge"></i> Aktifkan Akun Siswa</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="main-app-section" class="main-app-layout" style="display: none;">
+        
+        <div class="top-mini-header">
+            <div class="header-brand-side">
+                <i class="fa-solid fa-graduation-cap text-success"></i>
+                <span id="user-display-top">Siswa Smart Engine</span>
+            </div>
+            <button onclick="logoutProcess()" class="logout-link-btn"><i class="fa-solid fa-power-off"></i> Keluar</button>
+        </div>
+
+        <div class="swipe-container" id="pages-swiper">
+            
+            <div class="swipe-page content-container">
+                <div class="page-instruction-area">
+                    <h4>Kartu Identitas Digital Siswa</h4>
+                    <p>Ketuk kartu di bawah untuk melihat QR Code mesin scan</p>
+                </div>
+
+                <div class="card-siswa-wrapper" onclick="toggleCardFlip(this)">
+                    <div class="card-siswa-inner">
+                        
+                        <div class="card-siswa-front">
+                            <img src="" id="card-front-img" class="card-avatar" alt="Foto Siswa">
+                            <div class="card-info">
+                                <h2 id="card-front-nama">NAMA SISWA</h2>
+                                <p><i class="fa-solid fa-fingerprint"></i> NISN: <span id="card-front-nisn">00000</span></p>
+                                <p><i class="fa-solid fa-door-open"></i> Kelas: <span id="card-front-kelas">-</span></p>
+                                <p><i class="fa-solid fa-phone"></i> HP: <span id="card-front-hp">-</span></p>
+                                <div class="card-school">MAN 2 Sijunjung Plus Keterampilan</div>
+                            </div>
+                        </div>
+
+                        <div class="card-siswa-back">
+                            <div class="qr-side">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=POPO&ecc=H" alt="QR Code" id="card-back-qr">
+                                <div class="qr-code-text" id="card-back-code">POPO</div>
+                            </div>
+                            <div class="rules-side">
+                                <h4><i class="fa-solid fa-gavel"></i> Aturan Penggunaan</h4>
+                                <ol>
+                                    <li>Wajib melakukan scan kartu setiap pagi sebelum pukul 07:30 WIB.</li>
+                                    <li>Kartu dilarang disalahgunakan atau dipindahtangankan ke siswa lain.</li>
+                                    <li>Jika tidak hadir tanpa izin aplikasi, otomatis tercatat **Alpha**.</li>
+                                </ol>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="info-card-yellow" style="margin-top: 15px;">
+                    <i class="fa-solid fa-circle-exclamation info-yellow-icon"></i>
+                    <div>
+                        <p class="font-bold">Peringatan Kehadiran Harian!</p>
+                        <p style="font-size: 0.8rem;">Jika dalam 1 hari Anda tidak melakukan tapping QR pada mesin gerbang sekolah atau tidak mengisi izin di aplikasi ini, sistem cerdas akan otomatis mengunci status kehadiran hari ini sebagai <strong>ALPHA (Tanpa Keterangan)</strong> pada jam 17:00 WIB.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swipe-page content-container">
+                
+                <div class="card" style="margin-bottom: 20px;">
+                    <h3><i class="fa-solid fa-calendar-days text-primary"></i> Jadwal & Kalender Akademik</h3>
+                    <p class="desc">Klik pada tanggal untuk melihat jadwal mata pelajaran hari itu.</p>
+                    
+                    <div class="mini-calendar">
+                        <div class="cal-day-head">Sn</div><div class="cal-day-head">Sl</div><div class="cal-day-head">Rb</div><div class="cal-day-head">Km</div><div class="cal-day-head">Jm</div><div class="cal-day-head">Sb</div><div class="cal-day-head">Mg</div>
+                        <div class="cal-date" onclick="showSchedule(this, 'Senin')">1</div>
+                        <div class="cal-date" onclick="showSchedule(this, 'Selasa')">2</div>
+                        <div class="cal-date active" onclick="showSchedule(this, 'Rabu')">3</div>
+                        <div class="cal-date" onclick="showSchedule(this, 'Kamis')">4</div>
+                        <div class="cal-date" onclick="showSchedule(this, 'Jumat')">5</div>
+                        <div class="cal-date" onclick="showSchedule(this, 'Sabtu')">6</div>
+                        <div class="cal-date" onclick="showSchedule(this, 'Minggu')">7</div>
+                    </div>
+                    <div class="schedule-box" id="schedule-result-box">
+                        <div class="subject-item">07:30 - 09:00 | Fisika Gelombang (Mekanik & Bunyi)</div>
+                        <div class="subject-item">09:15 - 10:45 | Pemrograman Dasar (Alat Coding CT)</div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom: 20px;">
+                    <h3><i class="fa-solid fa-envelope-open-text text-warning"></i> Form Absensi Mandiri (Izin / Sakit)</h3>
+                    <p class="desc">Gunakan jika berhalangan hadir ke sekolah agar tidak terkena sistem Alpha otomatis.</p>
+                    <form onsubmit="submitAbsenMandiri(event)">
+                        <div class="form-group">
+                            <label>Jenis Keterangan</label>
+                            <select id="absensi-jenis" required>
+                                <option value="Izin">Izin (Ada Keperluan Keluarga Utama)</option>
+                                <option value="Sakit">Sakit (Butuh Istirahat/Perawatan)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Alasan / Keterangan Tambahan</label>
+                            <input type="text" id="absensi-alasan" placeholder="Tulis alasan singkat..." required>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-full"><i class="fa-solid fa-paper-plane"></i> Kirim Surat Absensi</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="table-header-flex">
+                        <h3><i class="fa-solid fa-chart-pie text-success"></i> Rangkuman Kehadiran Anda</h3>
+                    </div>
+                    
+                    <div class="card-filter-bar" style="margin-bottom: 15px;">
+                        <div class="filter-group">
+                            <label>Periode Filter</label>
+                            <select id="filter-periode-rekap" onchange="applyRekapFilter()">
+                                <option value="semua">Semua Riwayat Kehadiran</option>
+                                <option value="minggu">Minggu Ini</option>
+                                <option value="bulan">Bulan Ini</option>
+                                <option value="semester1">Semester 1 (Ganjil)</option>
+                                <option value="semester2">Semester 2 (Genap)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="text-center">Tepat Waktu</th>
+                                    <th class="text-center">Terlambat</th>
+                                    <th class="text-center">Izin</th>
+                                    <th class="text-center">Sakit</th>
+                                    <th class="text-center">Alpha (Bolos)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-center font-bold text-success" id="stat-tepat">24</td>
+                                    <td class="text-center font-bold text-danger" id="stat-lambat">2</td>
+                                    <td class="text-center font-bold" style="color:var(--warning-color);" id="stat-izin">1</td>
+                                    <td class="text-center font-bold" style="color:var(--accent-color);" id="stat-sakit">1</td>
+                                    <td class="text-center font-bold" style="color:#ef4444; background:#fef2f2;" id="stat-alpha">0</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <button class="bottom-nav-btn active" id="btn-nav-home" onclick="navigateToPage(0)">
+                <i class="fa-solid fa-id-card"></i>
+                <span>Kartu Siswa</span>
+            </button>
+            <button class="bottom-nav-btn" id="btn-nav-features" onclick="navigateToPage(1)">
+                <i class="fa-solid fa-layer-group"></i>
+                <span>Fitur & Rekap</span>
+            </button>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

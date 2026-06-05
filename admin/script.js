@@ -4,6 +4,9 @@
  * Fitur: Real Hardware Camera QR Scanner & Professional Dropdown Filtering
  * =========================================================================
  */
+// Menyimpan daftar kode_unik siswa yang sedang dalam masa jeda (cooldown)
+const siswaSedangCooldown = {};
+const DURASI_JEDA_MS = 5000; // Jeda 5 Detik (Silakan ubah sesuai kebutuhan)
 
 const API_URL = "https://script.google.com/macros/s/AKfycbzGIPmW2lCPl8qEOPq76NGik56LF2A6fenpPzTpuGqwtzJ6AsuEafz2EJbmpc1OoqqLcg/exec";
 let html5QrcodeScanner = null; // Instance global untuk modul kamera hardware
@@ -248,6 +251,15 @@ function registrasiFormEvent() {
 function prosesKodeSiswaDitemukan(kodeUnik) {
     if (!kodeUnik) return;
 
+    // ==========================================
+    // SISTEM JEDA / COOLDOWN ANTISIPASI DOUBLE SCAN
+    // ==========================================
+    if (siswaSedangCooldown[kodeUnik]) {
+        console.warn(`[JEDA] Kode Unik ${kodeUnik} baru saja melakukan scan. Mengabaikan scan beruntun.`);
+        // Opsional: Berikan notifikasi suara atau teks ringkas di log agar operator tahu
+        return; 
+    }
+
     const siswaDaftar = JSON.parse(localStorage.getItem("db_data_siswa")) || [];
     const aturanJam = JSON.parse(localStorage.getItem("db_jam_masuk")) || [];
     const dataSiswa = siswaDaftar.find(s => s.kode_unik === kodeUnik);
@@ -257,6 +269,15 @@ function prosesKodeSiswaDitemukan(kodeUnik) {
         return;
     }
 
+    // Aktifkan masa jeda untuk siswa ini tepat setelah validasi database sukses
+    siswaSedangCooldown[kodeUnik] = true;
+    setTimeout(() => {
+        delete siswaSedangCooldown[kodeUnik]; // Jeda selesai, siswa bisa scan lagi nanti (misal saat pulang)
+    }, DURASI_JEDA_MS);
+
+    // ==========================================
+    // SISA LOGIKA PEMROSESAN DATA (TETAP SAMA)
+    // ==========================================
     const sekarang = new Date();
     const jamScanKini = kiniFormatJamMenit(sekarang);
     const tanggalHariIni = sekarang.toLocaleDateString('en-CA'); 
@@ -265,7 +286,6 @@ function prosesKodeSiswaDitemukan(kodeUnik) {
     const jamAturanToleransi = aturanJam[0] ? aturanJam[0].toleransi_telat : "07:45";
 
     let statusHasil = "Terlambat";
-    // Perbaikan pemanggilan nama fungsi murni (Bukan konversionsMenitMurni)
     if (konversiMenitMurni(jamScanKini) <= konversiMenitMurni(jamAturanMasuk) || konversiMenitMurni(jamScanKini) <= konversiMenitMurni(jamAturanToleransi)) {
         statusHasil = "Tepat Waktu";
     }
@@ -295,8 +315,6 @@ function prosesKodeSiswaDitemukan(kodeUnik) {
                 </p>
             </div>`;
     }
-
-    alert(`✅ Absen Berhasil Dicatat!\n\nNama: ${dataSiswa.nama_lengkap}\nKelas: ${dataSiswa.kelas}\nStatus: ${statusHasil} (${jamScanKini} WIB)\n\nData masuk ke Antrean Lokal.`);
 }
 
 async function sinkronisasiAntreanKeCloud() {
