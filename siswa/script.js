@@ -1,399 +1,470 @@
 /**
  * =========================================================================
- * SCRIPT CLIENT-SIDE LAMAN SISWA - MAN 2 SIJUNJUNG SMART ENGINE
- * Terkoneksi Langsung Dengan Google Sheets V4 Final Production API
+ * ENGINE CORE INTERKONEKSI UTAMA - HALAMAN SISWA (V4 - RUNTIME CLOUD)
+ * MAN 2 Sijunjung Plus Keterampilan
  * =========================================================================
  */
 
-// 1. KONFIGURASI WEB APP API 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzGIPmW2lCPl8qEOPq76NGik56LF2A6fenpPzTpuGqwtzJ6AsuEafz2EJbmpc1OoqqLcg/exec";
+// !!! GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA YANG SUDAH DI-DEPLOY !!!
+const API_URL = "https://script.google.com/macros/s/AKfycbzGIPmW2lCPl8qEOPq76NGik56LF2A6fenpPzTpuGqwtzJ6AsuEafz2EJbmpc1OoqqLcg/exec";
 
-// State Global Aplikasi
-let masterData = {}; 
-let currentUserSession = JSON.parse(localStorage.getItem('siswa_session')) || null;
+// State Global Runtime Aplikasi
+let sessionUser = null;
+let databaseCloud = null;
+let currentAuthTab = 'login';
 
 // ==========================================
-// 2. INITIALIZATION & SPLASH SCREEN VIA GET
+// 1. SISTEM ORKESTRASI SAAT PERTAMA DIMUAT
 // ==========================================
-window.addEventListener('DOMContentLoaded', async () => {
-    // Ambil basis data segar dari Google Sheets (doGet)
-    await fetchDatabaseFromSheets();
-
-    setTimeout(() => {
-        const splash = document.getElementById('splash-screen');
-        splash.style.opacity = '0';
-        splash.style.visibility = 'hidden';
+document.addEventListener("DOMContentLoaded", () => {
+    const splash = document.getElementById("splash-screen");
+    
+    // Jalankan timer splash hiasan awal selama 2.5 detik
+    setTimeout(async () => {
+        if (splash) splash.style.display = "none";
         
-        // Cek Sesi login lokal
-        if (currentUserSession) {
-            // Ambil data siswa terbaru hasil sinkronisasi dari sheets berdasarkan NISN
-            const siswaAktif = masterData.data_siswa.find(s => s.nisn.toString() === currentUserSession.nisn.toString());
-            if (siswaAktif) {
-                currentUserSession = siswaAktif; // Perbarui data session
-                localStorage.setItem('siswa_session', JSON.stringify(currentUserSession));
-                launchMainApp();
-            } else {
-                // Jika NISN dihapus oleh admin di database cloud
-                logoutProcess();
-            }
+        // Tampilkan loader cloud global saat mengambil snapshot spreadsheet
+        showGlobalLoader("Menyinkronkan Basis Data Cloud...");
+        await ambilDataMasterDariCloud();
+        hideGlobalLoader();
+
+        // Cek apakah fitur "Ingat Saya" aktif dari sesi sebelumnya
+        const savedUser = localStorage.getItem("remembered_siswa_m2spk");
+        if (savedUser) {
+            sessionUser = JSON.parse(savedUser);
+            // Segarkan data sesi seandainya admin mengubah detail profil di lembar spreadsheet hulu
+            sinkronkanUlangSesiSiswa();
+            renderHalamanUtamaAplikasi();
         } else {
-            // Menampilkan form login/daftar
-            document.getElementById('auth-section').style.display = 'flex';
+            // Jika tidak ada sesi tersimpan, lempar siswa ke panel Log/Daftar
+            document.getElementById("auth-section").style.display = "block";
         }
-    }, 2000);
+    }, 2500);
 });
 
-// Fungsi Sync Mengambil Data (doGet)
-async function fetchDatabaseFromSheets() {
+// Fungsi untuk menarik seluruh data (GET) dari server Sheets
+async function ambilDataMasterDariCloud() {
     try {
-        const response = await fetch(SCRIPT_URL, { method: "GET" });
+        const response = await fetch(API_URL, { method: "GET" });
         const result = await response.json();
         if (result.status === "success") {
-            masterData = result.data;
-            // Backup lokal jika suatu saat offline
-            localStorage.setItem('master_data_backup', JSON.stringify(masterData));
+            databaseCloud = result.data;
+            console.log("☁️ Data Cloud Tersinkron:", databaseCloud);
+            // Suntik opsi pilihan kelas dari database ke komponen dropdown di setup-profile
+            populasiDropdownKelas();
+        } else {
+            alert("⚠️ Gagal mengunduh struktur data cloud: " + result.message);
         }
-    } catch (error) {
-        console.error("Sinkronisasi gagal, memuat backup lokal...", error);
-        masterData = JSON.parse(localStorage.getItem('master_data_backup')) || { jam_masuk:[], jadwal_pelajaran:[], daftar_kelas:[], data_siswa:[], riwayat_absensi:[] };
-        triggerSystemBanner("Koneksi Lambat", "Menggunakan data lokal.", "fa-triangle-exclamation");
+    } catch (err) {
+        console.error(err);
+        alert("❌ Putus koneksi. Pastikan perangkat Anda terhubung ke internet.");
     }
 }
 
-// ==========================================
-// 3. PROSES AUTENTIKASI (LOGIN & DAFTAR)
-// ==========================================
-function switchAuthTab(tab) {
-    const btnLogin = document.querySelectorAll('.auth-tab-btn')[0];
-    const btnReg = document.querySelectorAll('.auth-tab-btn')[1];
-    if (tab === 'login') {
-        btnLogin.classList.add('active');
-        btnReg.classList.remove('active');
-        document.getElementById('form-login').style.display = 'block';
-        document.getElementById('form-register').style.display = 'none';
-    } else {
-        btnReg.classList.add('active');
-        btnLogin.classList.remove('active');
-        document.getElementById('form-login').style.display = 'none';
-        document.getElementById('form-register').style.display = 'block';
-    }
-}
-
-// Pendaftaran Akun (Validasi awal NISN sebelum melengkapi profil)
-async function handleRegister(e) {
-    e.preventDefault();
-    const nisn = document.getElementById('reg-nisn').value.trim();
-
-    // Cek di master data apakah NISN ini sudah terdaftar sebelumnya di database cloud
-    const sudahAda = masterData.data_siswa.find(s => s.nisn.toString() === nisn);
-    if (sudahAda) {
-        triggerSystemBanner("Sudah Terdaftar", "NISN Anda telah aktif, silakan masuk.", "fa-circle-info");
-        switchAuthTab('login');
-        return;
-    }
-
-    // Alihkan langsung ke form pelengkap data agar data masuk ke Google Sheets sekali jalan
-    document.getElementById('auth-section').style.display = 'none';
-    document.getElementById('profile-completion-section').style.display = 'flex';
-    document.getElementById('setup-nisn').value = nisn;
+function populasiDropdownKelas() {
+    const selectKelas = document.getElementById("setup-kelas");
+    if (!selectKelas || !databaseCloud || !databaseCloud.daftar_kelas) return;
     
-    // Load opsi kelas secara dinamis dari database Google Sheets tab 'Daftar_Kelas'
-    const selectKelas = document.getElementById('setup-kelas');
-    selectKelas.innerHTML = '<option value="">-- Pilih Ruang Kelas --</option>';
-    masterData.daftar_kelas.forEach(k => {
-        let opt = document.createElement('option');
-        opt.value = k.id_kelas;
-        opt.innerText = `${k.nama_kelas}`;
+    // Bersihkan opsi bawaan kecuali placeholder pertama
+    selectKelas.innerHTML = '<option value="">-- Pilih Kelas Anda --</option>';
+    
+    databaseCloud.daftar_kelas.forEach(item => {
+        const opt = document.createElement("option");
+        opt.value = item.nama_kelas; // Menggunakan Nama Kelas sebagai relasi string identitas
+        opt.innerText = item.nama_kelas;
         selectKelas.appendChild(opt);
     });
 }
 
-// Proses Login Mencocokkan NISN dan Nomor HP sebagai sandi akses
-async function handleLogin(e) {
-    e.preventDefault();
-    const nisn = document.getElementById('login-nisn').value.trim();
-    const pwd = document.getElementById('login-pwd').value.trim(); // Siswa memasukkan Nomor HP di input password
-
-    // Validasi langsung mencocokkan NISN dan Nomor HP yang ada di sheet Data_Siswa
-    const userMatch = masterData.data_siswa.find(s => 
-        s.nisn.toString() === nisn && s.nomor_hp.toString() === pwd
+function sinkronkanUlangSesiSiswa() {
+    if (!databaseCloud || !sessionUser) return;
+    const dataTerbaru = databaseCloud.data_siswa.find(
+        s => s.nisn.toString() === sessionUser.nisn.toString()
     );
-
-    if (userMatch) {
-        currentUserSession = userMatch;
-        localStorage.setItem('siswa_session', JSON.stringify(currentUserSession));
-        triggerSystemBanner("Berhasil Masuk", `Selamat datang kembali, ${userMatch.nama_lengkap}`, "fa-circle-check");
-        launchMainApp();
-    } else {
-        triggerSystemBanner("Gagal Masuk", "NISN tidak terdaftar atau Nomor HP salah!", "fa-circle-exclamation");
-    }
-}
-
-// Submit Profil Lengkap Menuju Aksi "tambah_siswa" di Apps Script
-async function saveCompleteProfile(e) {
-    e.preventDefault();
-    const nisn = document.getElementById('setup-nisn').value;
-    const nama = document.getElementById('setup-nama').value.trim();
-    const kelas = document.getElementById('setup-kelas').value;
-    const hp = document.getElementById('setup-hp').value.trim();
-    const imgView = document.getElementById('selfie-img-view');
-    
-    let base64Foto = imgView.style.display === 'block' ? imgView.src : "-";
-
-    const payload = {
-        action: "tambah_siswa",
-        nama_lengkap: nama,
-        nisn: nisn,
-        nomor_hp: hp,
-        kelas: kelas,
-        foto_profil: base64Foto
-    };
-
-    triggerSystemBanner("Menyimpan...", "Mengirim data siswa ke Google Sheets Cloud...", "fa-cloud-arrow-up");
-
-    try {
-        const response = await fetch(SCRIPT_URL, {
-            method: "POST",
-            body: JSON.stringify(payload)
-        });
-        const res = await response.json();
-
-        if (res.status === "success") {
-            // Ambil kode_unik yang otomatis digenerate oleh backend Anda (Contoh: M2SPKXE1-1)
-            payload.kode_unik = res.kode_unik;
-            currentUserSession = payload;
-            localStorage.setItem('siswa_session', JSON.stringify(currentUserSession));
-            
-            triggerSystemBanner("Registrasi Sukses", "Akun & Kartu Siswa Anda telah aktif!", "fa-id-card");
-            
-            // Refresh data dari cloud agar sinkron total
-            await fetchDatabaseFromSheets();
-            launchMainApp();
-        } else {
-            triggerSystemBanner("Gagal Menyimpan", res.message, "fa-circle-xmark");
+    if (dataTerbaru) {
+        sessionUser = dataTerbaru;
+        // Jika status "Ingat Saya" aktif, perbarui isi data lokal terbarunya
+        if(localStorage.getItem("remembered_siswa_m2spk")) {
+            localStorage.setItem("remembered_siswa_m2spk", JSON.stringify(sessionUser));
         }
-    } catch (err) {
-        triggerSystemBanner("Gangguan Server", "Gagal menghubungi API Sheets.", "fa-triangle-exclamation");
     }
 }
 
 // ==========================================
-// 4. HANDLER FOTO (KAMERA & FILE INPUT BASE64)
+// 2. OTENTIKASI (LOGIN & DAFTAR) HANDLER
 // ==========================================
-function triggerCamera() {
-    const randomImgId = Math.floor(Math.random() * 70);
-    const mockSelfieUrl = `https://i.pravatar.cc/150?img=${randomImgId}`;
-    
-    document.getElementById('selfie-placeholder').style.display = 'none';
-    const imgView = document.getElementById('selfie-img-view');
-    imgView.src = mockSelfieUrl;
-    imgView.style.display = 'block';
-    triggerSystemBanner("Kamera Aktif", "Foto sukses diambil.", "fa-camera");
-}
+function switchAuthTab(tabMode) {
+    currentAuthTab = tabMode;
+    const loginForm = document.getElementById("form-login");
+    const regForm = document.getElementById("form-register");
+    const loginTabBtn = document.getElementById("tab-login-btn");
+    const regTabBtn = document.getElementById("tab-register-btn");
 
-function loadAvatarFile(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = function() {
-        document.getElementById('selfie-placeholder').style.display = 'none';
-        const imgView = document.getElementById('selfie-img-view');
-        imgView.src = reader.result; 
-        imgView.style.display = 'block';
+    if (tabMode === 'login') {
+        loginForm.style.display = "block";
+        regForm.style.display = "none";
+        loginTabBtn.classList.add("active");
+        regTabBtn.classList.remove("active");
+    } else {
+        loginForm.style.display = "block"; // Biarkan login form tersembunyi
+        loginForm.style.display = "none";
+        regForm.style.display = "block";
+        loginTabBtn.classList.remove("active");
+        regTabBtn.classList.add("active");
     }
-    reader.readAsDataURL(file);
 }
 
-// ==========================================
-// 5. APPLIKASI UTAMA (RENDERING DATA & KARTU 3D)
-// ==========================================
-function launchMainApp() {
-    document.getElementById('auth-section').style.display = 'none';
-    document.getElementById('profile-completion-section').style.display = 'none';
-    document.getElementById('main-app-section').style.display = 'block';
-
-    document.getElementById('user-display-top').innerText = currentUserSession.nama_lengkap;
-    
-    document.getElementById('card-front-img').src = currentUserSession.foto_profil !== "-" ? currentUserSession.foto_profil : "https://via.placeholder.com/90x115?text=MAN2";
-    document.getElementById('card-front-nama').innerText = currentUserSession.nama_lengkap.toUpperCase();
-    document.getElementById('card-front-nisn').innerText = currentUserSession.nisn;
-    document.getElementById('card-front-kelas').innerText = currentUserSession.kelas;
-    document.getElementById('card-front-hp').innerText = currentUserSession.nomor_hp;
-    
-    const qrCodeReal = currentUserSession.kode_unik || "POPO";
-    document.getElementById('card-back-qr').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qrCodeReal}&ecc=H`;
-    document.getElementById('card-back-code').innerText = qrCodeReal;
-
-    calculateAttendanceStats(qrCodeReal);
-    renderTodaySchedule(currentUserSession.kelas);
+function togglePasswordVisibility(inputId, buttonElement) {
+    const input = document.getElementById(inputId);
+    const icon = buttonElement.querySelector("i");
+    if (input.type === "password") {
+        input.type = "text";
+        icon.classList.replace("fa-eye", "fa-eye-slash");
+    } else {
+        input.type = "password";
+        icon.classList.replace("fa-eye-slash", "fa-eye");
+    }
 }
 
-function toggleCardFlip(element) {
-    element.classList.toggle('flipped');
-}
-
-function calculateAttendanceStats(kodeUnik) {
-    let tepatWaktu = 0;
-    let terlambat = 0;
-    let izin = 0;
-    let sakit = 0;
-    let alpha = 0;
-
-    const riwayatUser = masterData.riwayat_absensi.filter(r => r.kode_unik === kodeUnik);
-
-    riwayatUser.forEach(item => {
-        const stat = item.status.trim().toLowerCase();
-        if (stat === "tepat waktu") tepatWaktu++;
-        else if (stat === "terlambat") terlambat++;
-        else if (stat === "izin") izin++;
-        else if (stat === "sakit") sakit++;
-        else if (stat === "alpha") alpha++;
-    });
-
-    document.getElementById('stat-tepat').innerText = tepatWaktu;
-    document.getElementById('stat-lambat').innerText = terlambat;
-    document.getElementById('stat-izin').innerText = izin;
-    document.getElementById('stat-sakit').innerText = sakit;
-    document.getElementById('stat-alpha').innerText = alpha;
-}
-
-// ==========================================
-// 6. FITUR AKADEMIK & FILTER JADWAL RIIL
-// ==========================================
-function renderTodaySchedule(idKelas) {
-    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-    const hariIni = days[new Date().getDay()];
-    
-    document.querySelectorAll('.cal-date').forEach(el => el.classList.remove('active'));
-    loadScheduleByDay(idKelas, hariIni);
-}
-
-function showSchedule(element, hari) {
-    document.querySelectorAll('.cal-date').forEach(el => el.classList.remove('active'));
-    element.classList.add('active');
-    loadScheduleByDay(currentUserSession.kelas, hari);
-}
-
-function loadScheduleByDay(idKelas, hari) {
-    const resultBox = document.getElementById('schedule-result-box');
-    resultBox.innerHTML = '';
-
-    const jadwalCocok = masterData.jadwal_pelajaran.filter(j => j.id_kelas.toLowerCase() === idKelas.toLowerCase() && j.hari.toLowerCase() === hari.toLowerCase());
-
-    if (jadwalCocok.length === 0) {
-        resultBox.innerHTML = `<div class="subject-item" style="border-left-color: var(--text-muted)">-- Tidak Ada Jadwal Pelajaran (${hari}) --</div>`;
+// Proses Pendaftaran Awal Akses Akun
+async function handleRegister(event) {
+    event.preventDefault();
+    if (!databaseCloud) {
+        alert("⚠️ Sinkronisasi server belum selesai, silakan coba beberapa saat lagi.");
         return;
     }
 
-    jadwalCocok.forEach(m => {
-        const item = document.createElement('div');
-        item.className = 'subject-item';
-        item.innerText = `${m.jam_mulai} - ${m.jam_berakhir} | ${m.mata_pelajaran}`;
-        resultBox.appendChild(item);
-    });
+    const inputNisn = document.getElementById("reg-nisn").value.trim();
+    const inputHp = document.getElementById("reg-hp").value.trim();
+
+    // Validasi pencegahan duplikasi data lokal hulu
+    const cekSiswaExist = databaseCloud.data_siswa.find(s => s.nisn.toString() === inputNisn);
+    if (cekSiswaExist) {
+        alert("⚠️ NISN tersebut sudah terdaftar di cloud. Silakan langsung gunakan menu MASUK.");
+        switchAuthTab('login');
+        document.getElementById("login-nisn").value = inputNisn;
+        return;
+    }
+
+    // Arahkan langsung ke halaman "Lengkapi Profil" dengan mengunci input pendaftaran
+    document.getElementById("auth-section").style.display = "none";
+    document.getElementById("profile-completion-section").style.display = "block";
+    
+    document.getElementById("setup-nisn").value = inputNisn;
+    document.getElementById("setup-hp").value = inputHp;
 }
 
-// ==========================================
-// 7. INPUT KETIDAKHADIRAN (ACTION: input_ketidakhadiran)
-// ==========================================
-async function submitAbsenMandiri(e) {
-    e.preventDefault();
-    const jenisStatus = document.getElementById('absensi-jenis').value; 
-    const alasan = document.getElementById('absensi-alasan').value.trim();
+// Proses Log Masuk Aplikasi
+async function handleLogin(event) {
+    event.preventDefault();
+    if (!databaseCloud) {
+        alert("⚠️ Server cloud belum siap dihubungi.");
+        return;
+    }
 
-    const payload = {
-        action: "input_ketidakhadiran",
-        kode_unik: currentUserSession.kode_unik || "POPO",
-        status: jenisStatus,
-        bukti_status: alasan ? `Alasan: ${alasan}` : "-"
-    };
+    const inputNisn = document.getElementById("login-nisn").value.trim();
+    const inputHp = document.getElementById("login-pwd").value.trim();
+    const rememberMeCheck = document.getElementById("login-remember").checked;
 
-    triggerSystemBanner("Mengirim...", "Mengunggah surat absensi mandiri...", "fa-spinner");
+    // Cari kecocokan NISN & No.HP (sebagai sandi) di array master data_siswa hasil GET hulu
+    const userTerotentikasi = databaseCloud.data_siswa.find(
+        s => s.nisn.toString() === inputNisn && s.nomor_hp.toString() === inputHp
+    );
 
-    try {
-        const response = await fetch(SCRIPT_URL, {
-            method: "POST",
-            body: JSON.stringify(payload)
-        });
-        const res = await response.json();
-
-        if (res.status === "success") {
-            triggerSystemBanner("Berhasil", `Pelaporan ${jenisStatus} berhasil dicatat di database Cloud!`, "fa-circle-check");
-            document.getElementById('absensi-alasan').value = '';
-            
-            await fetchDatabaseFromSheets();
-            calculateAttendanceStats(currentUserSession.kode_unik);
-        } else {
-            triggerSystemBanner("Gagal Absen", res.message, "fa-circle-xmark");
+    if (userTerotentikasi) {
+        sessionUser = userTerotentikasi;
+        
+        if (rememberMeCheck) {
+            localStorage.setItem("remembered_siswa_m2spk", JSON.stringify(sessionUser));
         }
-    } catch (err) {
-        triggerSystemBanner("Koneksi Putus", "Gagal memproses absensi mandiri.", "fa-triangle-exclamation");
+        
+        renderHalamanUtamaAplikasi();
+    } else {
+        alert("❌ Gagal Masuk: Kombinasi NISN & No HP salah, atau profil Anda belum diaktifkan!");
     }
 }
 
-function applyRekapFilter() {
-    triggerSystemBanner("Filter Diterapkan", "Menampilkan data histori terpilih.", "fa-filter");
-    calculateAttendanceStats(currentUserSession.kode_unik);
+// ==========================================
+// 3. FITUR LENGKAPI DATA PROFIL (TEMBAK POST DATA_SISWA)
+// ==========================================
+function triggerDeviceGallery() {
+    document.getElementById("file-hidden-input").removeAttribute("capture");
+    document.getElementById("file-hidden-input").click();
+}
+
+function openSelfieCamera() {
+    document.getElementById("file-hidden-input").setAttribute("capture", "user");
+    document.getElementById("file-hidden-input").click();
+}
+
+function previewFileImage(inputElement) {
+    const file = inputElement.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            // Tampilkan berkas string base64 ke elemen visual avatar
+            document.getElementById("selfie-img-view").src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+async function saveCompleteProfile(event) {
+    event.preventDefault();
+    showGlobalLoader("Menyimpan Dokumen & Membuat Kode Unik...");
+
+    const payloadSiswaBaru = {
+        action: "tambah_siswa",
+        nama_lengkap: document.getElementById("setup-nama").value.trim(),
+        nisn: document.getElementById("setup-nisn").value.trim(),
+        nomor_hp: document.getElementById("setup-hp").value.trim(),
+        kelas: document.getElementById("setup-kelas").value,
+        foto_profil: document.getElementById("selfie-img-view").src // Mengirim string base64 gambar
+    };
+
+    try {
+        const response = await fetch(API_URL, {
+            method: "POST",
+            mode: "cors",
+            headers: { "Content-Type": "text/plain" }, // CORS Safe Fallback Apps Script
+            body: JSON.stringify(payloadSiswaBaru)
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === "success") {
+            alert(`🎉 Registrasi Berhasil!\nKode Unik Kartu Anda: ${result.kode_unik}`);
+            
+            // Tarik ulang snapshot data master cloud agar siswa baru terindeks di sistem lokal
+            await ambilDataMasterDariCloud();
+            
+            // Set objek sesi berdasarkan data yang baru masuk di cloud
+            sessionUser = databaseCloud.data_siswa.find(s => s.nisn.toString() === payloadSiswaBaru.nisn);
+            
+            // Anggap pendaftaran pertama kali langsung mengaktifkan fitur ingat saya
+            localStorage.setItem("remembered_siswa_m2spk", JSON.stringify(sessionUser));
+            
+            renderHalamanUtamaAplikasi();
+        } else {
+            alert("❌ Penolakan Cloud: " + result.message);
+        }
+    } catch (error) {
+        console.error(error);
+        alert("❌ Terjadi gangguan internal pengiriman data cloud.");
+    } finally {
+        hideGlobalLoader();
+    }
 }
 
 // ==========================================
-// 8. GLOBAL UTILITIES (SWIPE, BANNER, AUD)
+// 4. PENANGANAN LAYOUT & RENDERING VIEW UTAMA
+// ==========================================
+function renderHalamanUtamaAplikasi() {
+    document.getElementById("auth-section").style.display = "none";
+    document.getElementById("profile-completion-section").style.display = "none";
+    document.getElementById("main-app-section").style.display = "block";
+
+    // Petakan data sesi aktif ke elemen Top Bar & Sisi Depan Kartu Siswa Digital
+    document.getElementById("user-display-top").innerText = sessionUser.nama_lengkap;
+    document.getElementById("card-front-nama").innerText = sessionUser.nama_lengkap.toUpperCase();
+    document.getElementById("card-front-nisn").innerText = sessionUser.nisn;
+    document.getElementById("card-front-kelas").innerText = sessionUser.kelas;
+    document.getElementById("card-front-hp").innerText = sessionUser.nomor_hp;
+
+    // Set Foto Profil Siswa
+    const avatarSrc = sessionUser.foto_profil && sessionUser.foto_profil !== "-" ? sessionUser.foto_profil : "https://via.placeholder.com/150";
+    document.getElementById("card-front-img").src = avatarSrc;
+
+    // Buat QR Code Otomatis di Sisi Belakang Kartu Berdasarkan Kode Unik Cloud (`M2SPK...`)
+    const nilaiQR = sessionUser.kode_unik || sessionUser.nisn;
+    document.getElementById("card-back-qr").src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${nilaiQR}&ecc=H`;
+    document.getElementById("card-back-code").innerText = nilaiQR;
+
+    // Jalankan kalkulasi data tabel log rekap pribadi siswa
+    prosesDanRenderRekapPribadi();
+
+    // Default navigasi mengarah ke tab tengah (Beranda)
+    navigateToPage(1);
+}
+
+// ==========================================
+// 5. FITUR ABSENSI MANDIRI (IZIN / SAKIT)
+// ==========================================
+async function submitAbsenMandiri(event) {
+    event.preventDefault();
+    if (!sessionUser) return;
+
+    showGlobalLoader("Mengirim Berkas Lampiran...");
+
+    const payloadAbsen = {
+        action: "input_ketidakhadiran",
+        kode_unik: sessionUser.kode_unik,
+        status: document.getElementById("absensi-jenis").value, // "Izin" atau "Sakit"
+        bukti_status: document.getElementById("absensi-bukti-link").value.trim()
+    };
+
+    try {
+        const response = await fetch(API_URL, {
+            method: "POST",
+            mode: "cors",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify(payloadAbsen)
+        });
+        
+        const result = await response.json();
+        if (result.status === "success") {
+            alert(`✅ Pelaporan status "${payloadAbsen.status}" sukses tercatat di pangkalan data.`);
+            document.getElementById("absensi-alasan").value = "";
+            document.getElementById("absensi-bukti-link").value = "";
+            
+            // Tarik ulang data cloud teranyar lalu segarkan visual tabel rekap harian
+            await ambilDataMasterDariCloud();
+            prosesDanRenderRekapPribadi();
+        } else {
+            alert("❌ Cloud menolak: " + result.message);
+        }
+    } catch (err) {
+        console.error(err);
+        alert("❌ Gagal terhubung ke server cloud absensi.");
+    } finally {
+        hideGlobalLoader();
+    }
+}
+
+// ==========================================
+// 6. ENGINE KOMPUTASI & RENDERING REKAP SISWA
+// ==========================================
+function prosesDanRenderRekapPribadi() {
+    const wadahTabel = document.getElementById("rekap-list-container");
+    if (!wadahTabel) return;
+
+    wadahTabel.innerHTML = "";
+
+    // Inisialisasi Counter Penghitung Akumulasi Ringkas (Summary Box)
+    let totalHadir = 0;
+    let totalTelat = 0;
+    let totalSakit = 0;
+    let totalIzin = 0;
+    let totalAlpha = 0;
+
+    if (!databaseCloud || !databaseCloud.riwayat_absensi) {
+        wadahTabel.innerHTML = `<tr><td colspan="3" class="text-center text-muted">Belum ada catatan absensi.</td></tr>`;
+        return;
+    }
+
+    // Filter baris data riwayat murni milik siswa yang sedang aktif bersangkutan
+    const riwayatSiswaAktif = databaseCloud.riwayat_absensi.filter(
+        item => item.kode_unik === sessionUser.kode_unik
+    ).reverse(); // Balik urutan agar data tanggal paling baru berada di baris atas
+
+    if (riwayatSiswaAktif.length === 0) {
+        wadahTabel.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-4">Tidak ada log data kehadiran.</td></tr>`;
+        updateVisualSummaryBoxes(0, 0, 0, 0, 0);
+        return;
+    }
+
+    // Iterasi pengisian baris tabel sekaligus menjumlahkan counter status harian
+    riwayatSiswaAktif.forEach(item => {
+        let badgeStyle = "bg-danger";
+        
+        switch (item.status) {
+            case "Tepat Waktu":
+                badgeStyle = "bg-success";
+                totalHadir++;
+                break;
+            case "Terlambat":
+                badgeStyle = "bg-warning text-dark";
+                totalTelat++;
+                break;
+            case "Sakit":
+                badgeStyle = "bg-info text-dark";
+                totalSakit++;
+                break;
+            case "Izin":
+                badgeStyle = "bg-primary";
+                totalIzin++;
+                break;
+            case "Alpha":
+                badgeStyle = "bg-danger";
+                totalAlpha++;
+                break;
+        }
+
+        const baris = document.createElement("tr");
+        baris.innerHTML = `
+            <td class="fw-bold text-secondary">${formatFormatTanggalId(item.tanggal)}</td>
+            <td class="fw-mono">${item.jam_scan} WIB</td>
+            <td><span class="badge ${badgeStyle}">${item.status}</span></td>
+        `;
+        wadahTabel.appendChild(baris);
+    });
+
+    // Perbarui angka ringkasan harian di dashboard atas tab rekap
+    updateVisualSummaryBoxes(totalHadir, totalTelat, totalSakit, totalIzin, totalAlpha);
+}
+
+function updateVisualSummaryBoxes(h, t, s, i, a) {
+    document.getElementById("summary-hadir").innerText = h;
+    document.getElementById("summary-telat").innerText = t;
+    document.getElementById("summary-sakit").innerText = s;
+    document.getElementById("summary-izin").innerText = i;
+    document.getElementById("summary-alpha").innerText = a;
+}
+
+function formatFormatTanggalId(stringTanggal) {
+    if (!stringTanggal || stringTanggal === "-") return "-";
+    try {
+        const opsi = { year: 'numeric', month: 'short', day: 'numeric' };
+        return new Date(stringTanggal).toLocaleDateString('id-ID', opsi);
+    } catch(e) {
+        return stringTanggal; // Fallback jika string bukan format standar tanggal
+    }
+}
+
+// ==========================================
+// 7. UTILITIES NAVIGATION CONTROL UI
 // ==========================================
 function navigateToPage(pageIndex) {
     const swiper = document.getElementById('pages-swiper');
-    const btnHome = document.getElementById('btn-nav-home');
-    const btnFeatures = document.getElementById('btn-nav-features');
+    if (!swiper) return;
+
+    document.getElementById('btn-nav-absen').classList.remove('active');
+    document.getElementById('btn-nav-home').classList.remove('active');
+    document.getElementById('btn-nav-rekap').classList.remove('active');
 
     if (pageIndex === 0) {
         swiper.style.transform = 'translateX(0%)';
-        btnHome.classList.add('active');
-        btnFeatures.classList.remove('active');
-    } else {
-        swiper.style.transform = 'translateX(-50%)';
-        btnFeatures.classList.add('active');
-        btnHome.classList.remove('active');
+        document.getElementById('btn-nav-absen').classList.add('active');
+    } else if (pageIndex === 1) {
+        swiper.style.transform = 'translateX(-33.333%)';
+        document.getElementById('btn-nav-home').classList.add('active');
+    } else if (pageIndex === 2) {
+        swiper.style.transform = 'translateX(-66.666%)';
+        document.getElementById('btn-nav-rekap').classList.add('active');
     }
 }
 
-let touchstartX = 0;
-let touchendX = 0;
-document.getElementById('pages-swiper').addEventListener('touchstart', e => touchstartX = e.changedTouches[0].screenX );
-document.getElementById('pages-swiper').addEventListener('touchend', e => {
-    touchendX = e.changedTouches[0].screenX;
-    if (touchstartX - touchendX > 100) navigateToPage(1);
-    if (touchendX - touchstartX > 100) navigateToPage(0);
-});
-
-function playNotificationSound() {
-    try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(659.25, audioCtx.currentTime); 
-        gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
-        oscillator.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        oscillator.start();
-        oscillator.stop(audioCtx.currentTime + 0.12);
-    } catch(e) {}
-}
-
-function triggerSystemBanner(title, text, iconClass) {
-    playNotificationSound();
-    const banner = document.getElementById('statusbar-notification');
-    const icon = document.getElementById('noti-icon-element');
-    
-    document.getElementById('noti-title').innerText = title;
-    document.getElementById('noti-text').innerText = text;
-    icon.className = `fa-solid ${iconClass} noti-icon`;
-    
-    banner.classList.add('show');
-    setTimeout(() => { banner.classList.remove('show'); }, 3500);
+function toggleCardFlip(cardWrapperElement) {
+    cardWrapperElement.classList.toggle('flipped');
 }
 
 function logoutProcess() {
-    localStorage.removeItem('siswa_session');
-    location.reload();
+    if (confirm("Apakah Anda yakin ingin keluar dari Akun Siswa MAN 2 Sijunjung?")) {
+        localStorage.removeItem("remembered_siswa_m2spk");
+        sessionUser = null;
+        location.reload();
+    }
+}
+
+function showGlobalLoader(pesanTeks) {
+    const loader = document.getElementById("global-cloud-loader");
+    if (loader) {
+        document.getElementById("loader-text").innerText = pesanTeks;
+        loader.style.display = "flex";
+    }
+}
+
+function hideGlobalLoader() {
+    const loader = document.getElementById("global-cloud-loader");
+    if (loader) loader.style.display = "none";
 }
