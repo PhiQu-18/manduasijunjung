@@ -1,0 +1,7 @@
+sekarang kita lanjutkan untuk siswa nya. jadi strukturnya yaitu siswa.html, style.css dan script.js. adapun fiturnya:
+
+1. saat pertama kali masuk kedalam web nya maka akan muncul splashscreen logo dan nama sekolah. setelah itu langsung masuk ke halaman daftar/login.
+
+2. pada halaman daftar, siswa disuruh untuk memasukkan NISN dan nomor hp bertindak sebagai password. setelah itu mereka diarahkan kehalaman login dengan menggunakan NISN dan Nomor hp yang sudah didatarkan sebelumnya.
+
+3. setelah masuk, mereka langsung disuruh untuk melengkapi data seperti foto profil, nama lengkap, NISN dan nama sekolah dan nomor hp (terkunci karna sudah otomatis terisi dari sebelumnya), kelas (yang berasal dari database yang diinput dihalaman admin).

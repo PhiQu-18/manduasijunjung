@@ -9,7 +9,7 @@
 const siswaSedangCooldown = {};
 const DURASI_JEDA_MS = 5000; // Jeda 5 Detik (Silakan ubah sesuai kebutuhan)
 
-const API_URL = "https://script.google.com/macros/s/AKfycbwmcPIjNZVIRre51egtk2xDgSr4CooNJ06YNuMPaNQHpWGRPDVI_px0887XrMmQuh0JXg/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxHDn7KSm8FsB17CVaaOAJAJbHPq1cCj4rFBjtzGrCIf8dn09FQtEPqJAJmhKBhDsvdGA/exec";
 let html5QrcodeScanner = null; // Instance global untuk modul kamera hardware
 let absensiChartInstance = null; // Instance global untuk Chart.js grafik absensi
 
