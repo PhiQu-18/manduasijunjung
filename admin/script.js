@@ -8,7 +8,7 @@
 const siswaSedangCooldown = {};
 const DURASI_JEDA_MS = 5000; // Jeda 5 Detik (Silakan ubah sesuai kebutuhan)
 
-const API_URL = "https://script.google.com/macros/s/AKfycbzGIPmW2lCPl8qEOPq76NGik56LF2A6fenpPzTpuGqwtzJ6AsuEafz2EJbmpc1OoqqLcg/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzJFRFhKghUg0hSytkGS4dAGSSKAI1YFmjDGAPPD7h1OjIKd4MbX8iyOjgGEO7jMMevaQ/exec";
 let html5QrcodeScanner = null; // Instance global untuk modul kamera hardware
 
 document.addEventListener("DOMContentLoaded", function() {

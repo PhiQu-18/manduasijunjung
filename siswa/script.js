@@ -6,7 +6,7 @@
  */
 
 // !!! GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA YANG SUDAH DI-DEPLOY !!!
-const API_URL = "https://script.google.com/macros/s/AKfycbzGIPmW2lCPl8qEOPq76NGik56LF2A6fenpPzTpuGqwtzJ6AsuEafz2EJbmpc1OoqqLcg/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzJFRFhKghUg0hSytkGS4dAGSSKAI1YFmjDGAPPD7h1OjIKd4MbX8iyOjgGEO7jMMevaQ/exec";
 
 // State Global Runtime Aplikasi
 let sessionUser = null;
