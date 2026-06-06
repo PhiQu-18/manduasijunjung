@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -148,6 +150,14 @@
                         <p id="label-jam-aktif" style="margin-top: 5px;">Jam Masuk: <strong>--:--</strong> WIB</p>
                         <p id="label-toleransi-aktif">Batas Maksimal Toleransi: <strong>--:--</strong> WIB</p>
                     </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 20px;">
+                <h3><i class="fa-solid fa-chart-pie"></i> Grafik Ringkasan Akumulasi Absensi Sekolah</h3>
+                <p class="desc" style="margin-bottom: 15px;">Visualisasi total statistik seluruh siswa berdasarkan parameter jam masuk saat ini.</p>
+                <div style="position: relative; max-width: 500px; margin: 0 auto;">
+                    <canvas id="absensiChart"></canvas>
                 </div>
             </div>
         </section>

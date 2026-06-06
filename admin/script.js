@@ -2,6 +2,7 @@
  * =========================================================================
  * LOGIC RUNTIME ENGINE - MAN 2 SIJUNJUNG SMART ENGINE V6 (PATCHED)
  * Fitur: Real Hardware Camera QR Scanner & Professional Dropdown Filtering
+ * Integration: Dynamic Chart.js Analytics on Tab Jam Masuk
  * =========================================================================
  */
 // Menyimpan daftar kode_unik siswa yang sedang dalam masa jeda (cooldown)
@@ -10,6 +11,7 @@ const DURASI_JEDA_MS = 5000; // Jeda 5 Detik (Silakan ubah sesuai kebutuhan)
 
 const API_URL = "https://script.google.com/macros/s/AKfycbwmcPIjNZVIRre51egtk2xDgSr4CooNJ06YNuMPaNQHpWGRPDVI_px0887XrMmQuh0JXg/exec";
 let html5QrcodeScanner = null; // Instance global untuk modul kamera hardware
+let absensiChartInstance = null; // Instance global untuk Chart.js grafik absensi
 
 document.addEventListener("DOMContentLoaded", function() {
     matikanSplashscreen();
@@ -55,6 +57,11 @@ function setupNavigasiTab() {
             // Penghematan daya baterai: otomatis matikan kamera jika user meninggalkan tab beranda
             if (this.dataset.target !== "tab-beranda" && html5QrcodeScanner) {
                 matikanKameraSistem();
+            }
+
+            // TRIGGER GRAFIK: Jika user membuka tab pengaturan jam masuk, render ulang grafiknya
+            if (this.dataset.target === "tab-jam") {
+                kalkulasiDanRenderGrafikGlobal();
             }
         });
     });
@@ -136,8 +143,8 @@ function perbaruiTampilanSemuaTab() {
     renderTabelMasterJadwalDanKelas();
     renderTabelSiswaDanRekapKumulatif();
     updateCounterAntreanLokal();
-    // Jalankan penyaringan ulang untuk mensinkronkan filter drop-down yang sedang terpilih
     jalankanPenyaringanMasterProfesional(); 
+    kalkulasiDanRenderGrafikGlobal(); // Perbarui visualisasi data grafik
 }
 
 function tampilkanStatusCloud(pesan, warnaBg) {
@@ -159,11 +166,9 @@ function updateCounterAntreanLokal() {
 // =========================================================================
 
 function registrasiFormEvent() {
-    // Event Handler Kamera Hardware
     const btnKamera = document.getElementById("btn-toggle-camera");
     if (btnKamera) btnKamera.addEventListener("click", toggleKameraHardware);
 
-    // Event Handler Input Manual
     const btnSubmitScan = document.getElementById("btn-submit-scan");
     if (btnSubmitScan) {
         btnSubmitScan.addEventListener("click", () => {
@@ -188,21 +193,21 @@ function registrasiFormEvent() {
     const btnFlush = document.getElementById("btn-flush-database");
     if (btnFlush) btnFlush.addEventListener("click", sinkronisasiAntreanKeCloud);
 
-    // Filter Listeners (Siswa)
     const filterSiswaKelas = document.getElementById("filter-siswa-kelas");
     if (filterSiswaKelas) filterSiswaKelas.addEventListener("change", renderTabelSiswaDanRekapKumulatif);
     
     const filterSiswaWaktu = document.getElementById("filter-siswa-waktu");
     if (filterSiswaWaktu) filterSiswaWaktu.addEventListener("change", renderTabelSiswaDanRekapKumulatif);
     
-    // Filter Listeners (Master Kelas & Jadwal)
     const filterMasterKelas = document.getElementById("select-filter-master-kelas");
     if (filterMasterKelas) filterMasterKelas.addEventListener("change", jalankanPenyaringanMasterProfesional);
     
     const filterMasterHari = document.getElementById("select-filter-master-hari");
     if (filterMasterHari) filterMasterHari.addEventListener("change", jalankanPenyaringanMasterProfesional);
 
-    // Form Submissions (Menggunakan async preventDefault agar halaman tidak ter-refresh)
+    const btnRefreshRekap = document.getElementById("btn-refresh-rekap");
+    if (btnRefreshRekap) btnRefreshRekap.addEventListener("click", muatDatabaseAwal);
+
     const formJam = document.getElementById("form-jam-masuk");
     if (formJam) {
         formJam.addEventListener("submit", async function(e) {
@@ -251,12 +256,8 @@ function registrasiFormEvent() {
 function prosesKodeSiswaDitemukan(kodeUnik) {
     if (!kodeUnik) return;
 
-    // ==========================================
-    // SISTEM JEDA / COOLDOWN ANTISIPASI DOUBLE SCAN
-    // ==========================================
     if (siswaSedangCooldown[kodeUnik]) {
         console.warn(`[JEDA] Kode Unik ${kodeUnik} baru saja melakukan scan. Mengabaikan scan beruntun.`);
-        // Opsional: Berikan notifikasi suara atau teks ringkas di log agar operator tahu
         return; 
     }
 
@@ -269,15 +270,11 @@ function prosesKodeSiswaDitemukan(kodeUnik) {
         return;
     }
 
-    // Aktifkan masa jeda untuk siswa ini tepat setelah validasi database sukses
     siswaSedangCooldown[kodeUnik] = true;
     setTimeout(() => {
-        delete siswaSedangCooldown[kodeUnik]; // Jeda selesai, siswa bisa scan lagi nanti (misal saat pulang)
+        delete siswaSedangCooldown[kodeUnik];
     }, DURASI_JEDA_MS);
 
-    // ==========================================
-    // SISA LOGIKA PEMROSESAN DATA (TETAP SAMA)
-    // ==========================================
     const sekarang = new Date();
     const jamScanKini = kiniFormatJamMenit(sekarang);
     const tanggalHariIni = sekarang.toLocaleDateString('en-CA'); 
@@ -407,7 +404,6 @@ function validasiFilterWaktu(tanggalString, tipeFilter) {
     return true;
 }
 
-// RE-CONFIGURED SEAMLESS DATA FILTERING MANAGEMENT
 function jalankanPenyaringanMasterProfesional() {
     const filterKelasElemen = document.getElementById("select-filter-master-kelas");
     const filterHariElemen = document.getElementById("select-filter-master-hari");
@@ -417,7 +413,6 @@ function jalankanPenyaringanMasterProfesional() {
     const kelasTerpilih = filterKelasElemen.value;
     const hariTerpilih = filterHariElemen.value;
 
-    // 1. Filter Tabel Kelas menggunakan pembacaan atribut data-kelas
     document.querySelectorAll("#tbody-master-kelas tr").forEach(row => {
         const idKelasSisiTabel = row.getAttribute("data-kelas");
         if (!idKelasSisiTabel) return;
@@ -429,7 +424,6 @@ function jalankanPenyaringanMasterProfesional() {
         }
     });
 
-    // 2. Filter Tabel Jadwal Pelajaran menggunakan pembacaan atribut data-kelas & data-hari
     document.querySelectorAll("#tbody-master-jadwal tr").forEach(row => {
         const kelasSisiTabel = row.getAttribute("data-kelas");
         const hariSisiTabel = row.getAttribute("data-hari");
@@ -443,6 +437,79 @@ function jalankanPenyaringanMasterProfesional() {
             row.style.display = "";
         } else {
             row.style.display = "none";
+        }
+    });
+}
+
+// =========================================================================
+// CORE ENGINE: DYNAMIC CHART RENDERING LOGIC
+// =========================================================================
+
+function kalkulasiDanRenderGrafikGlobal() {
+    const canvas = document.getElementById("absensiChart");
+    if (!canvas) return;
+
+    const riwayatAbsen = JSON.parse(localStorage.getItem("db_riwayat_absensi")) || [];
+    
+    let totalRekap = { tepat: 0, telat: 0, sakit: 0, izin: 0, alpha: 0 };
+
+    // Akumulasikan seluruh record riwayat absensi yang tersimpan di database lokal
+    riwayatAbsen.forEach(log => {
+        if (log.status === "Tepat Waktu") totalRekap.tepat++;
+        else if (log.status === "Terlambat") totalRekap.telat++;
+        else if (log.status === "Sakit") totalRekap.sakit++;
+        else if (log.status === "Izin") totalRekap.izin++;
+        else if (log.status === "Alpha") totalRekap.alpha++;
+    });
+
+    const ctx = canvas.getContext('2d');
+
+    // Mencegah memory leak atau penumpukan render grafik lama saat data di-refresh
+    if (absensiChartInstance) {
+        absensiChartInstance.destroy();
+    }
+
+    // Pembuatan objek Chart menggunakan format Doughnut profesional
+    absensiChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Tepat Waktu', 'Terlambat', 'Sakit', 'Izin', 'Alpha'],
+            datasets: [{
+                label: 'Total Rekapitulasi Sekolah',
+                data: [totalRekap.tepat, totalRekap.telat, totalRekap.sakit, totalRekap.izin, totalRekap.alpha],
+                backgroundColor: [
+                    '#10b981', // Emerald Green (Tepat)
+                    '#ef4444', // Red Rose (Telat)
+                    '#0369a1', // Ocean Blue (Sakit)
+                    '#b45309', // Amber Orange (Izin)
+                    '#6b21a8'  // Deep Purple (Alpha)
+                ],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 12,
+                        font: { family: 'sans-serif', size: 12, weight: 'bold' },
+                        padding: 15
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            let nilai = context.raw || 0;
+                            return ` ${label}: ${nilai} Kali Scan`;
+                        }
+                    }
+                }
+            }
         }
     });
 }
@@ -498,7 +565,6 @@ function renderTabelMasterJadwalDanKelas() {
     const listJadwal = JSON.parse(localStorage.getItem("db_jadwal_pelajaran")) || [];
 
     listKelas.forEach(k => {
-        // Menyisipkan data-kelas ke baris TR agar dapat dibaca oleh filter pencarian tanpa konflik
         tKelas.innerHTML += `
             <tr data-kelas="${k.id_kelas}">
                 <td><strong>${k.id_kelas}</strong></td>
@@ -508,7 +574,6 @@ function renderTabelMasterJadwalDanKelas() {
     });
 
     listJadwal.forEach(j => {
-        // Menyisipkan data-kelas & data-hari ke baris TR untuk filtrasi multi-dropdown
         tJadwal.innerHTML += `
             <tr data-kelas="${j.id_kelas}" data-hari="${j.hari}">
                 <td><code>${j.id_kelas}</code></td>
@@ -526,7 +591,7 @@ async function postDataKeCloud(payload) {
         const r = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
         const res = await r.json();
         alert(res.message);
-        await muatDatabaseAwal(); // Refresh database lokal dari cloud secara sinkronus
+        await muatDatabaseAwal();
         return true;
     } catch(e) { 
         alert("Operasi cloud gagal. Periksa koneksi internet."); 
@@ -551,7 +616,6 @@ function kiniFormatJamMenit(d) {
     return String(d.getHours()).padStart(2, '0') + ":" + String(d.getMinutes()).padStart(2, '0');
 }
 
-// Koreksi Nama Fungsi Murni (Menghapus huruf 's' berlebih yang memicu putusnya runtime)
 function konversiMenitMurni(str) {
     if (!str || !str.includes(":")) return 0;
     const p = str.split(":");
