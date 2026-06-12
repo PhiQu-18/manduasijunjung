@@ -1,0 +1,328 @@
+/* =========================================================================
+   STYLE UTAMA - ADMIN PANEL MAN 2 SIJUNJUNG
+   ========================================================================= */
+
+:root {
+    --primary-color: #1b5e20;    /* Hijau Tua Madrasah */
+    --secondary-color: #2e7d32;  /* Hijau Sedang */
+    --accent-color: #4caf50;     /* Hijau Terang */
+    --bg-light: #f4f7f5;         /* Abu-abu Hijau Sangat Lembut */
+    --text-dark: #2c3e50;
+    --text-light: #ffffff;
+    --card-bg: #ffffff;
+    --danger-color: #d32f2f;
+    --warning-color: #f57c00;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+    overflow-x: hidden;
+}
+
+/* Helper Class */
+.hidden { display: none !important; }
+
+/* =========================================================================
+   1. SPLASHSCREEN & LOGIN OVERLAY SCREEN
+   ========================================================================= */
+.overlay-screen {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle, var(--secondary-color) 0%, var(--primary-color) 100%);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-light);
+    text-align: center;
+}
+
+.splash-content, .login-card {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 40px;
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    max-width: 400px;
+    width: 90%;
+}
+
+.school-logo-icon {
+    font-size: 60px;
+    margin-bottom: 15px;
+    color: #fff;
+    animation: pulse 2s infinite;
+}
+
+.loader-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    margin: 20px 0;
+    overflow: hidden;
+}
+
+.loader-progress {
+    width: 10%;
+    height: 100%;
+    background: #fff;
+    transition: width 0.3s ease;
+}
+
+.status-blink {
+    font-size: 14px;
+    opacity: 0.8;
+    animation: blink 1.5s infinite;
+}
+
+/* Form Login */
+.login-card { background: var(--card-bg); color: var(--text-dark); }
+.login-icon { font-size: 45px; color: var(--primary-color); margin-bottom: 15px; }
+.login-card h2 { margin-bottom: 5px; color: var(--primary-color); }
+.login-card p { font-size: 14px; color: #7f8c8d; margin-bottom: 25px; }
+
+.input-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.input-group i {
+    position: absolute;
+    left: 15px; top: 50%;
+    transform: translateY(-50%);
+    color: #95a5a6;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px 15px 12px 45px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    font-size: 15px;
+    transition: 0.3s;
+}
+
+.input-group input:focus { border-color: var(--secondary-color); }
+
+/* =========================================================================
+   2. DASHBOARD LAYOUT & SIDEBAR
+   ========================================================================= */
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 260px;
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    position: fixed;
+    height: 100vh;
+    z-index: 100;
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 20px;
+}
+
+.sidebar-brand i { font-size: 28px; }
+.sidebar-brand h3 { font-size: 16px; font-weight: 600; }
+.sidebar-brand span { font-size: 12px; opacity: 0.7; }
+
+.realtime-clock {
+    background: rgba(0,0,0,0.15);
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 25px;
+    letter-spacing: 1px;
+}
+
+.nav-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-grow: 1;
+}
+
+.nav-item {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    padding: 14px 15px;
+    border-radius: 8px;
+    text-align: left;
+    font-size: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    transition: 0.2s ease;
+    opacity: 0.8;
+}
+
+.nav-item:hover, .nav-item.active {
+    background: rgba(255,255,255,0.15);
+    opacity: 1;
+    font-weight: 600;
+}
+
+.btn-logout {
+    background: none; border: none;
+    color: #ff8a80; padding: 12px;
+    cursor: pointer; text-align: left;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 15px; margin-top: auto;
+}
+
+/* =========================================================================
+   3. MAIN KONTEN & CARD
+   ========================================================================= */
+.main-content {
+    margin-left: 260px;
+    flex-grow: 1;
+    padding: 30px;
+}
+
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    margin-bottom: 25px;
+}
+
+.card h3 {
+    font-size: 16px;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 2px solid var(--bg-light);
+    padding-bottom: 10px;
+}
+
+/* Button Global Styles */
+button {
+    border: none; border-radius: 6px;
+    padding: 10px 18px; font-size: 14px;
+    font-weight: 600; cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.btn-primary { background: var(--secondary-color); color: white; }
+.btn-primary:hover { background: var(--primary-color); }
+.btn-secondary { background: #34495e; color: white; }
+.btn-secondary:hover { background: #2c3e50; }
+.btn-success { background: #27ae60; color: white; }
+.btn-success:hover { background: #219653; }
+.btn-danger { background: var(--danger-color); color: white; padding: 6px 12px; font-size: 12px;}
+
+/* =========================================================================
+   4. TAB-SPECIFIC DESIGNS (SCAN, REKAP, MANAJEMEN)
+   ========================================================================= */
+.tab-content { display: none; }
+.tab-content.active-tab { display: block; animation: fadeIn 0.4s ease; }
+
+/* Grid Scan */
+.grid-scan {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 25px;
+}
+
+#reader-container {
+    width: 100%; max-width: 380px;
+    margin: 0 auto; overflow: hidden;
+    border-radius: 12px; border: 4px solid var(--secondary-color);
+}
+
+.scan-profile-box {
+    display: flex; flex-direction: column;
+    align-items: center; text-align: center;
+    padding: 20px;
+}
+
+.placeholder-text { color: #95a5a6; font-style: italic; margin-top: 50px; }
+
+/* Filter Grid & Tabel */
+.filter-group-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+select, .form-group input {
+    width: 100%; padding: 10px;
+    border: 1px solid #ccc; border-radius: 6px;
+    outline: none; font-size: 14px;
+}
+
+.grid-rekap-visual, .grid-management {
+    display: grid; grid-template-columns: 2fr 1fr; gap: 25px;
+}
+.grid-management { grid-template-columns: 1fr 1fr; }
+
+/* Desain Tabel HTML */
+.table-responsive { overflow-x: auto; background: white; border-radius: 8px; }
+table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+th, td { padding: 14px 16px; border-bottom: 1px solid #eef2f5; }
+th { background-color: #f8fafc; color: #64748b; font-weight: 600; }
+tbody tr:hover { background-color: #f8fafc; }
+
+/* Form Group */
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #475569; }
+
+/* =========================================================================
+   5. ANIMASI & RESPONSIVE BREAKPOINT
+   ========================================================================= */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+@keyframes blink { 50% { opacity: 0.4; } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.pulse { animation: pulse 2s infinite; }
+
+/* Responsivitas Layar HP */
+@media (max-width: 992px) {
+    .dashboard-container { flex-direction: column; }
+    .sidebar { width: 100%; height: auto; position: relative; }
+    .main-content { margin-left: 0; padding: 15px; }
+    .grid-scan, .grid-rekap-visual, .grid-management { grid-template-columns: 1fr; }
+}

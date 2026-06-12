@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - MAN 2 Sijunjung Plus Keterampilan</title>
+    <link rel="stylesheet" href="css/admin-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+<body>
+
+    <div id="splashscreen" class="overlay-screen">
+        <div class="splash-content">
+            <div class="logo-animation">
+                <i class="fa-solid fa-graduation-cap school-logo-icon"></i>
+            </div>
+            <h2>MAN 2 SIJUNJUNG</h2>
+            <p>Plus Keterampilan</p>
+            <div class="loader-bar">
+                <div class="loader-progress" id="loadProgress"></div>
+            </div>
+            <p id="status-text" class="status-blink">Menyinkronkan Database Google Sheets...</p>
+        </div>
+    </div>
+
+    <div id="login-page" class="overlay-screen hidden">
+        <div class="login-card">
+            <i class="fa-solid fa-lock login-icon"></i>
+            <h2>Login Administrator</h2>
+            <p>Masukkan nama sekolah untuk masuk ke sistem</p>
+            <div class="input-group">
+                <i class="fa-solid fa-school"></i>
+                <input type="text" id="school-input" placeholder="Contoh: MAN 2 Sijunjung">
+            </div>
+            <button id="btn-login" onclick="handleLogin()">Masuk Sistem</button>
+            <p id="login-error" class="error-msg"></p>
+        </div>
+    </div>
+
+    <div id="dashboard-layout" class="dashboard-container hidden">
+        
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <i class="fa-solid fa-user-shield"></i>
+                <div>
+                    <h3>MAN 2 Sijunjung</h3>
+                    <span>Panel Admin</span>
+                </div>
+            </div>
+            <div class="realtime-clock">
+                <i class="fa-regular fa-clock"></i> <span id="clock-display">00:00:00</span>
+            </div>
+            <nav class="nav-menu">
+                <button class="nav-item active" onclick="switchTab('tab-scan')"><i class="fa-solid fa-qrcode"></i> Scan Kartu</button>
+                <button class="nav-item" onclick="switchTab('tab-rekap')"><i class="fa-solid fa-chart-pie"></i> Rekap Absensi</button>
+                <button class="nav-item" onclick="switchTab('tab-jadwal')"><i class="fa-solid fa-calendar-days"></i> Atur Jadwal & Kelas</button>
+            </nav>
+            <button class="btn-logout" onclick="handleLogout()"><i class="fa-solid fa-power-off"></i> Keluar</button>
+        </aside>
+
+        <main class="main-content">
+            
+            <header class="main-header">
+                <h2>Aplikasi Absensi QR Code</h2>
+                <div class="sync-status-area">
+                    <button id="btn-sync-db" class="btn-primary pulse" onclick="uploadAntreanKeDatabase()">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Sinkronkan ke Database <span id="badge-antrean">0</span>
+                    </button>
+                </div>
+            </header>
+
+            <section id="tab-scan" class="tab-content active-tab">
+                <div class="grid-scan">
+                    <div class="card card-scanner">
+                        <h3><i class="fa-solid : camera"></i> Kamera Pemindai QR Code</h3>
+                        <div id="reader-container">
+                            <div id="reader"></div>
+                        </div>
+                    </div>
+                    <div class="card card-result">
+                        <h3><i class="fa-solid fa-user-check"></i> Hasil Pemindaian Siswa (Lokal)</h3>
+                        <div id="latest-scan-profile" class="scan-profile-box">
+                            <p class="placeholder-text">Silakan aktifkan kamera dan scan QR Code siswa...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tab-rekap" class="tab-content">
+                <div class="card table-controls">
+                    <h3><i class="fa-solid fa-filter"></i> Filter & Ekspor Rekapitulasi</h3>
+                    <div class="filter-group-grid">
+                        <select id="filter-kelas"><option value="">-- Semua Kelas --</option></select>
+                        <select id="filter-bulan">
+                            <option value="">-- Semua Bulan --</option>
+                            <option value="1">Januari</option><option value="2">Februari</option>
+                            <option value="3">Maret</option><option value="4">April</option>
+                            <option value="5">Mei</option><option value="6">Juni</option>
+                            <option value="7">Juli</option><option value="8">Agustus</option>
+                            <option value="9">September</option><option value="10">Oktober</option>
+                            <option value="11">November</option><option value="12">Desember</option>
+                        </select>
+                        <button class="btn-secondary" onclick="applyRekapFilter()"><i class="fa-solid fa-magnifying-glass"></i> Cari</button>
+                        <button class="btn-success" onclick="eksporRekapKeCSV()"><i class="fa-solid fa-file-csv"></i> Ekspor ke CSV</button>
+                    </div>
+                </div>
+
+                <div class="grid-rekap-visual">
+                    <div class="card table-responsive">
+                        <table id="table-rekap-siswa">
+                            <thead>
+                                <tr>
+                                    <th>NISN</th><th>Nama</th><th>Kelas</th><th>Hadir</th><th>Terlambat</th><th>Izin</th><th>Sakit</th><th>Alpha</th><th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="card card-chart">
+                        <h3><i class="fa-solid fa-chart-bar"></i> Grafik Ringkasan Kehadiran</h3>
+                        <canvas id="rekapChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tab-jadwal" class="tab-content">
+                <div class="grid-management">
+                    
+                    <div class="card">
+                        <h3><i class="fa-solid fa-clock"></i> Pengaturan Waktu Scan</h3>
+                        <div class="form-group">
+                            <label>Jam Masuk</label>
+                            <input type="time" id="input-jam-masuk">
+                        </div>
+                        <div class="form-group">
+                            <label>Batas Toleransi Keterlambatan (Menit)</label>
+                            <input type="number" id="input-jam-toleransi" placeholder="Contoh: 15">
+                        </div>
+                        <button class="btn-primary" onclick="simpanAturanJam()"><i class="fa-solid fa-floppy-disk"></i> Simpan Waktu</button>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fa-solid fa-folder-plus"></i> Tambah Kelas</h3>
+                        <div class="form-group">
+                            <label>Nama Kelas</label>
+                            <input type="text" id="input-nama-kelas" placeholder="Contoh: X IPA 1">
+                        </div>
+                        <button class="btn-primary" onclick="tambahKelas()"><i class="fa-solid fa-plus"></i> Tambah Kelas</button>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 1.5rem;">
+                    <h3><i class="fa-solid fa-book-medical"></i> Buat Jadwal Pelajaran</h3>
+                    <div class="filter-group-grid">
+                        <select id="input-jadwal-kelas"><option value="">-- Pilih Kelas --</option></select>
+                        <select id="input-jadwal-hari">
+                            <option value="Senin">Senin</option><option value="Selasa">Selasa</option>
+                            <option value="Rabu">Rabu</option><option value="Kamis">Kamis</option>
+                            <option value="Jumat">Jumat</option><option value="Sabtu">Sabtu</option>
+                        </select>
+                        <input type="text" id="input-jadwal-mapel" placeholder="Nama Mata Pelajaran">
+                        <input type="time" id="input-jadwal-mulai">
+                        <input type="time" id="input-jadwal-selesai">
+                        <button class="btn-primary" onclick="tambahJadwal()"><i class="fa-solid fa-plus"></i> Buat Jadwal</button>
+                    </div>
+                </div>
+
+                <div class="card table-responsive" style="margin-top: 1.5rem;">
+                    <div class="table-header-flex">
+                        <h3><i class="fa-solid fa-calendar-list"></i> Data Jadwal Pelajaran</h3>
+                        <button class="btn-success" onclick="eksporJadwalCSV()"><i class="fa-solid fa-file-excel"></i> Ekspor Jadwal</button>
+                    </div>
+                    <table id="table-jadwal-pelajaran">
+                        <thead>
+                            <tr>
+                                <th>ID Jadwal</th><th>Nama Kelas</th><th>Hari</th><th>Mata Pelajaran</th><th>Mulai</th><th>Selesai</th><th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="js/admin-app.js"></script>
+</body>
+</html>

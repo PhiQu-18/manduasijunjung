@@ -8,3 +8,20 @@ untuk siswa fiturnya yaitu:
 untuk halaman admin fiturnya yaitu:
 1. saat pertama kali masuk kedalam web maka akan langsung mendownload dan menyinkronkan ke dalam database kemudian diarahkan ke login dengan login sederhana, dengan memasukkan nama sekolah saja "MAN 2 Sijunjung"
 2. kemudian beberapa tombol navigasi dihalaman utama, yaitu "Scan" untuk melakukan scan kartu siswa dengan mengaktifkan kamera dan disamping tampilan kamera scan ada bagian kolom yang menampilkan data siswa yang baru melakukan scan (karna untuk kecepatan, maka datanya sementara dipending dilocal storage sampe disinkronkan kedalam database sehingga dibutuhkan tambahan tombol sinkronkan kedatabase). tombol "Rekap Absensi" untuk menampilkan data siswa, banyak hadir tepat waktu, terlambat, izin, sakit, alpha dalam bentuk tabel dan dibawahnya ada gambar grafik, bagian ini juga dilengkapi dengan fitur filter baik itu berdasarkan kelas dan bulan, tahun atau semester. tombol "jadwal" untuk mengatur jadwal seperti jadwal baris atau masuk dan jadwal batas toleransi scan, jika waktu scan lebih kecil dari waktu masuk/baris dan batas toleransi maka dinyatakan tepat waktu dan jika waktu scan lebih besar dari jadwal baris/masuk dan batas toleransi maka dinyatakan terlambat dan dihalaman yang sama juga ada form tambah kelas dan buat jadwal pelajaran yang akan dimasukkan kedalam database dan ditampilkan lagi kehalaman siswa disetiap halamannya selain fitur filter tambahkan juga fitur eksport ke csv seperti pada rekap absen per kelasnya atau per waktu berdasarkan filter yang dipilih dan pada jadwal mata pelajaran berdasarkan filter kelas yang dimasukkan. buatkan tampilan csv nya lebih rapi dan mudah dibaca tambahkan juga fitur edit dan hapus pada datanya yang ada dalam web.  buatkan halaman admin ini lebih bagus dan menarik dilengkapi logo dan nama sekolahdan buatkan juga waktu real-time dan tampilan yang profesional. dan untuk halaman admin ini buatkan tampilannya lebih rapi dan resonsif baik itu di laptop, hp atau pun di tab.
+
+
+
+oke. jadi saya membuatkan beberapa sheets database menggunakan googlesheets seperti pada gambar diatas.
+jadi sheets yang pertama yaitu sheets Siswa dengan kolom NISN, Kode_Unik, Nama, HP, Sekolah, Kelas, Foto, Password yang mana ini akan diambil atau diinput dihalaman siswa. Kode_Unik akan otomatis terbuat dan ditampilkan setelah siswa melengkapi data dihalaman siswa.
+sheets kedua yaitu sheet Absensi dengan kolom Timestamp, Tanggal, Waktu, NISN, Nama, Kelas, Status, Keterangan yang mana ini akan terisi saat siswa melakukan scan yang ada dihalaman admin. untuk status itu adalah terlambat, tepat waktu, izin, sakit atau alpha. dan keterangan itu misalnya jika dia sakit atau izin nantinya berupa foto atau dokumen bukti yang ditampilkan dalam bentu URL. dan untuk status izin dan sakit ini akan diambil dari inputan halaman siswa dan untuk alpha otomatis diambil jika siswa belum melakukan scan dan verifikasi izin atau sakit dihalaman siswa setelah melewati Jam_Toleransi.
+sheets ketiga yaitu Kelas dengan kolom ID_Kelas dan Nama_Kelas. untuk ID_Kelas akan otomatis terisi saat menambahkan Nama_Kelas dihalaman admin.
+sheets keempat yaitu Jadwal dengan kolom ID_Jadwal, Nama_Kelas, Hari, Mapel, Jam_Mulai, Jam_Selesai. ini akan diisi melalui halaman admin.
+sheet kelima yaitu Jam dengan kolom Jam_Masuk dan Jam_Toleransi. diinput melalui halaman admin. jika siswa menscan kartu melewati Jam_Masuk masuk akan dinyatakan Terlambat dan jika siswa scan kartu melewati Jam_Toleransi maka dinyatakan Alpha. dan akan terisi ke sheet Absensi.
+
+semua data ini antara lain dapat:
+1. diinput
+2. ditampilkan
+3. diedit
+4. dihapus
+
+melalui halaman admin dan halaman siswa.
